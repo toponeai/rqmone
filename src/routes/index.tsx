@@ -336,7 +336,12 @@ function EarthHome() {
       {/* Footer hint */}
       <div className="pointer-events-none absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-card/60 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur">
         <MapPin className="h-3 w-3" />
-        {points.length.toLocaleString()} entities on Earth · drag to rotate
+        {showRawPoints
+          ? `${points.length.toLocaleString()} entities in view`
+          : `${clusters
+              .reduce((sum, c) => sum + c.count, 0)
+              .toLocaleString()} entities in view · ${clusters.length} clusters`}
+        {" · scroll to zoom"}
       </div>
 
       <CreateEntityDialog
