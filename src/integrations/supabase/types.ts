@@ -53,6 +53,30 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       spatial_ref_sys: {
         Row: {
           auth_name: string | null
@@ -261,6 +285,7 @@ export type Database = {
         }
         Returns: string
       }
+      delete_entity: { Args: { p_id: string }; Returns: boolean }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {
@@ -425,6 +450,21 @@ export type Database = {
       }
       gettransactionid: { Args: never; Returns: unknown }
       longtransactionsenabled: { Args: never; Returns: boolean }
+      my_entities: {
+        Args: never
+        Returns: {
+          created_at: string
+          description: string
+          id: string
+          lat: number
+          lng: number
+          metadata: Json
+          published: boolean
+          title: string
+          type: Database["public"]["Enums"]["entity_type"]
+          updated_at: string
+        }[]
+      }
       populate_geometry_columns:
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
         | { Args: { use_typmod?: boolean }; Returns: string }
@@ -1062,6 +1102,18 @@ export type Database = {
         Returns: unknown
       }
       unlockrows: { Args: { "": string }; Returns: number }
+      update_entity: {
+        Args: {
+          p_description: string
+          p_id: string
+          p_lat: number
+          p_lng: number
+          p_metadata: Json
+          p_published: boolean
+          p_title: string
+        }
+        Returns: string
+      }
       updategeometrysrid: {
         Args: {
           catalogn_name: string
