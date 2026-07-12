@@ -60,8 +60,8 @@ function EarthHome() {
     lng: 0,
     altitude: 2.5,
   });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const globeApiRef = { current: null } as { current: any };
+  // A one-shot camera destination — new object each intent so the globe flies.
+  const [flyTo, setFlyTo] = useState<{ lat: number; lng: number; altitude?: number } | null>(null);
 
   // Debounce the search input.
   useEffect(() => {
@@ -161,12 +161,12 @@ function EarthHome() {
       openDetail(cluster.sampleId);
       return;
     }
-    // Otherwise, zoom in by ~2 levels. Halving altitude ≈ +1 zoom;
-    // we go a bit further so the click reveals sub-clusters.
-    setCamera((prev) => {
-      const nextAlt = Math.max(0.05, cluster.count > 100 ? prev.altitude / 2.5 : prev.altitude / 3);
-      return { lat: cluster.lat, lng: cluster.lng, altitude: nextAlt };
-    });
+    // Otherwise, fly in by ~2 levels. Halving altitude ≈ +1 zoom.
+    const nextAlt = Math.max(
+      0.05,
+      cluster.count > 100 ? camera.altitude / 2.5 : camera.altitude / 3,
+    );
+    setFlyTo({ lat: cluster.lat, lng: cluster.lng, altitude: nextAlt });
   };
 
   const requireAuthThenCreate = () => {
@@ -191,7 +191,7 @@ function EarthHome() {
         picking={picking}
         onClusterClick={handleClusterClick}
         onViewChange={setCamera}
-        focus={camera}
+        flyTo={flyTo}
       />
 
       {/* Ambient vignette for legibility of overlays. */}

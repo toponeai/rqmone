@@ -53,6 +53,12 @@ interface InteractiveEarthProps {
   clusters?: EntityCluster[];
   onClusterClick?: (cluster: EntityCluster) => void;
   onViewChange?: (camera: GlobeCamera) => void;
+  /**
+   * A one-shot camera destination. When this reference changes, the globe
+   * animates to (lat, lng, altitude). Use a fresh object for each intent —
+   * passing the same reference twice will not re-fly.
+   */
+  flyTo?: { lat: number; lng: number; altitude?: number } | null;
 }
 
 export function InteractiveEarth({
@@ -64,6 +70,7 @@ export function InteractiveEarth({
   clusters = [],
   onClusterClick,
   onViewChange,
+  flyTo = null,
 }: InteractiveEarthProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -145,6 +152,16 @@ export function InteractiveEarth({
     if (!g || !focus) return;
     g.pointOfView({ lat: focus.lat, lng: focus.lng, altitude: 1.6 }, 1200);
   }, [focus]);
+
+  // Fly to a one-shot destination whenever the prop reference changes.
+  useEffect(() => {
+    const g = globeRef.current;
+    if (!g || !flyTo) return;
+    g.pointOfView(
+      { lat: flyTo.lat, lng: flyTo.lng, altitude: flyTo.altitude ?? 1.2 },
+      900,
+    );
+  }, [flyTo]);
 
   // Clean up the debounce timer.
   useEffect(() => () => {
