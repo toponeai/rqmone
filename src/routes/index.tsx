@@ -29,7 +29,10 @@ export const Route = createFileRoute("/")({
 function EarthHome() {
   const navigate = useNavigate();
 
+  const { user, loading: authLoading } = useSession();
+
   const [rawQuery, setRawQuery] = useState("");
+
   const [query, setQuery] = useState("");
   const [activeTypes, setActiveTypes] = useState<EntityType[]>([]);
   const [resultsOpen, setResultsOpen] = useState(false);
