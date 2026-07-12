@@ -260,7 +260,9 @@ function EarthHome() {
                 >
                   <Icon className="h-3.5 w-3.5" />
                   {c.plural}
-                  <span className="opacity-70">{counts[c.type] ?? 0}</span>
+                  {counts[c.type] ? (
+                    <span className="opacity-70">{counts[c.type]}</span>
+                  ) : null}
                 </button>
               );
             })}
