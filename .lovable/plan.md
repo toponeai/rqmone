@@ -1,95 +1,87 @@
-# R.Q.M.1 — Milestone 1: Interactive Earth + Universal Entity Core
+# R.Q.M.1 — Milestone 3: Earth scale-up (Phase 3 finishing)
 
-This first slice builds the foundation every later engine plugs into: one universal entity model, a live 3D Earth as the homepage, geospatial storage/queries, and unified search. Later phases (auth deep-dive, wallet, ads, AI, live streams) attach to this without redesign.
+Prepare the interactive Earth for 10M+ entities. Today the globe fetches up to 2,000 points across the whole planet regardless of what you're looking at — fine for a demo, breaks past ~50k entities. This milestone adds true **viewport-driven loading** and **server-side clustering**, so the Earth stays fluid at any scale.
 
 ## What you'll get
 
-- A rotating **3D Earth** landing page with glowing entity points, ambient starfield, and a search bar.
-- A **universal entities system**: Businesses, Properties, Events, and Products all stored and displayed through one architecture.
-- **Click a point on Earth** → entity detail overlay. **Click empty space / search** → filter what's shown.
-- A **"Add to Earth"** flow to create entities with a location (map-pick), which appear live on the globe.
-- Real backend: PostgreSQL + PostGIS, row-level security, geospatial viewport queries.
-
-## Scope of this milestone
-
-Included: Earth UI, entity data model, create/browse/detail, category filtering, text + geo search, backend with PostGIS.
-Deferred to later phases (per the master spec): wallet/payments, ads engine, AI recommendations, live streams, messaging, notifications, mobile app, admin app. The schema and module boundaries are laid out so these attach cleanly.
+- **Server-side clustering** — from space you see aggregated clusters ("2,341 entities in this region") instead of thousands of individual pins.
+- **Zoom-to-cluster** — click a cluster and the globe smoothly zooms into that region, revealing its child clusters or individual points.
+- **Viewport-driven queries** — the Earth only fetches what's visible in the current camera view, with 300ms debounce as you rotate/zoom.
+- **Zoom-adaptive precision** — as you zoom in, the server splits clusters into finer cells automatically. Zoom in far enough and you see individual entities.
+- **Same look and feel** — clusters use the existing type colors; the search bar, filters and "Add to Earth" flow all keep working unchanged.
 
 ## Architecture
 
-Adapting the spec's monorepo to this single TanStack Start app: the "packages" become internal modules under `src/` (entity, maps, search, config, types) with clean seams, rather than separate published packages. This keeps the "everything is an entity / plug-in engines" philosophy without the monorepo overhead.
+### Backend: grid-hash clustering (PostGIS)
+
+New RPC `entities_cluster(bbox, precision, filter_types, search_query)` that quantizes each entity's coordinates onto a grid whose cell size is derived from `precision` (higher precision = finer cells), groups by cell, and returns:
 
 ```text
-src/
-  routes/
-    __root.tsx              app shell, meta, auth-state subscriber
-    index.tsx               Interactive Earth homepage
-    entity.$id.tsx          entity detail (shareable, SSR head)
-    _authenticated/         create/manage (gated) — added when auth lands
-    api/                    server routes if needed later
-  modules/
-    entity/                 entity types, DTOs, server fns (CRUD, queries)
-    maps/                   globe component, viewport→bbox helpers, point layer
-    search/                 search server fn + filter UI
-    config/                 entity-type registry (icons, colors, fields)
-  integrations/supabase/    generated client/types (via Lovable Cloud)
-  components/ui/            shadcn primitives
+cluster_key  text           -- deterministic per cell
+lat, lng     double         -- centroid of the cell
+count        integer        -- number of entities in the cell
+type         entity_type?   -- dominant type when the cell is single-type, else null
+sample_id    uuid?          -- when count = 1, the actual entity id (so click opens detail directly)
 ```
 
-### Universal entity model (matches the spec)
+Why grid-hash and not `ST_ClusterKMeans`: KMeans is O(N) *per query* and non-deterministic (clusters flicker as the viewport shifts). Grid-hashing is a single indexed `GROUP BY floor(lng/step), floor(lat/step)` — stable, fast, and gets faster as PostGIS narrows the bbox with the existing GIST index. Clusters at the same zoom appear in the same place every time.
+
+Precision → step-size table (roughly one screen ≈ 30 cells across at each zoom):
 
 ```text
-entity_type  enum: business | property | event | product
-             (extensible — adding a type = one enum value + registry entry)
-
-entities
-  id            uuid pk
-  type          entity_type
-  owner_id      uuid  (nullable now; wired to auth later)
-  title         text
-  description   text
-  published     boolean default true
-  location      geometry(Point, 4326)   -- PostGIS
-  metadata      jsonb                    -- type-specific fields
-  created_at    timestamptz
-  updated_at    timestamptz
+precision 3   → ~10°     (viewing continents)
+precision 5   → ~2.5°    (large countries)
+precision 7   → ~0.6°    (metro area)
+precision 9   → ~0.15°   (neighborhood)
+precision 11+ → return raw points instead of clusters
 ```
 
-- GIST index on `location` for fast geospatial/viewport queries.
-- `metadata` jsonb holds per-type fields (price, event date, business hours, etc.), so new categories never require schema changes — the spec's core requirement.
-- RLS: public can SELECT `published = true`; owner-scoped write policies stubbed now, enforced once auth is added. Full `GRANT`s included in the migration.
+The existing `entities_in_viewport` RPC keeps working for the highest zoom levels; the client picks between them based on camera altitude.
 
-### Data flow
+### Frontend: viewport-aware map
 
-- **Homepage load** → server function `getEntitiesInViewport(bbox, types, query)` returns lightweight points (id, type, title, lat, lng) via a PostGIS bbox query, primed through TanStack Query loader.
-- **Globe** renders points colored by type; hover shows title, click opens detail.
-- **Search bar** updates URL search params (`q`, `types`) → re-queries → globe + a results list update together.
-- **Entity detail** (`/entity/$id`) is its own SSR route with per-entity `head()` (title, og:title, og:description) so entities are shareable/indexable — the spec's discoverability goal.
+- `InteractiveEarth` gains an `onViewChange({ bbox, zoom })` callback fired from `controls`' change event, debounced 300ms.
+- New `src/modules/maps/viewport.ts` helpers: derive a lat/lng bbox from the globe camera (lat, lng, altitude), and map altitude → zoom → precision.
+- `src/routes/index.tsx` holds viewport state, switches between `getEntityClusters` (low zoom) and `getEntitiesInViewport` (high zoom) via one `useQuery` per view.
+- Globe layers:
+  - **Points layer** — unchanged, used at high zoom.
+  - **Clusters layer** — rendered via globe-gl's `htmlElementsData` (small circular badges showing count, sized by `log10(count)`). Cluster color = dominant type color or neutral primary when mixed.
+- Click a cluster → `pointOfView` animates to its centroid with a lower altitude, which triggers a new fetch at higher precision. Click a cluster whose `count === 1` → open the entity directly.
+- Search + type filters flow into both RPCs unchanged.
 
-## Rendering
+### Data flow at a glance
 
-- `react-globe.gl` for the 3D Earth (WebGL, points layer, auto-rotate, atmosphere). Rendered client-only (it needs `window`), with an SSR-safe fallback so the route still server-renders meta.
-- Category colors + icons from the `config` entity-type registry.
+```text
+camera change ──debounce 300ms──▶ derive bbox, zoom, precision
+                                   │
+                          precision ≤ 10 ?
+                          ┌──── yes ────┐        ┌──── no ────┐
+                          ▼             ▼        ▼            ▼
+                    getEntityClusters              getEntitiesInViewport
+                          │                              │
+                          ▼                              ▼
+                    cluster badges                  individual points
+                    (click → zoom in)               (click → detail)
+```
 
 ## Build steps
 
-1. **Enable Lovable Cloud** (database, PostGIS, auth-ready, storage).
-2. **Migration**: `entity_type` enum, `entities` table, PostGIS `location` + GIST index, RLS policies, GRANTs, plus a small seed of demo entities across the four types and several cities so the Earth looks alive immediately.
-3. **Entity module**: DTOs/types, `getEntitiesInViewport`, `getEntityById`, `createEntity` server functions (public read via publishable client; create stubbed open now, gated at auth phase).
-4. **Config registry**: the four entity types with labels, colors, icons, and their metadata field definitions.
-5. **Maps module**: client-only `<InteractiveEarth>` (react-globe.gl), viewport→bbox helper, point layer, hover/click handlers.
-6. **Homepage** (`index.tsx`): Earth + floating search/filter bar + slide-in results/detail overlay; replaces the placeholder.
-7. **Entity detail route** with SSR `head()`.
-8. **"Add to Earth"** create form with map location picker + type-specific fields driven by the registry.
-9. **Design system**: distinctive dark, space/aurora aesthetic via semantic tokens in `src/styles.css` (no hardcoded colors), a real app title/description/OG meta in `__root.tsx`.
-10. **Verify**: build, seed data renders on the globe, search/filter works, create adds a live point, entity detail loads.
+1. **Migration**: `entities_cluster` RPC (grid-hash `GROUP BY` on lat/lng cells, sizes derived from `precision`); add a partial GIST index `entities_location_published_gist` on `location` WHERE `published = true` for faster viewport queries at scale.
+2. **Server functions**: add `getEntityClusters` in `src/modules/entity/entity.functions.ts`; extend `getEntitiesInViewport` to actually respect the passed bbox (already does — verify).
+3. **Viewport helpers** in `src/modules/maps/viewport.ts`: `cameraToBbox({lat, lng, altitude})`, `altitudeToZoom`, `zoomToPrecision`.
+4. **`InteractiveEarth`** emits `onViewChange({ bbox, zoom, altitude })` from a debounced `controls('change')` handler, and accepts a new `clusters` prop rendered as `htmlElementsData`.
+5. **Homepage** (`src/routes/index.tsx`) tracks viewport, chooses cluster vs point query, wires cluster clicks to zoom-in. Existing search/filter/create UX unchanged.
+6. **Seed**: expand demo seed to ~2,000 entities (bulk-inserted across cities world-wide) so clustering is visibly meaningful in the demo. Existing hand-written seeds stay.
+7. **Verify**: rotate/zoom the globe — cluster badges appear at low zoom with sensible counts; zooming in splits them; zooming to street level shows individual entities; adding a new entity appears in the correct cluster after invalidation.
 
 ## Technical notes
 
-- Backend logic uses TanStack `createServerFn` (not Supabase Edge Functions); public reads use a publishable-key client with narrow `TO anon` SELECT policies; PostGIS bbox filtering keeps payloads small (viewport loading from the spec's Maps Engine).
-- Clustering is approximated in this milestone via viewport limiting + point sizing; true server-side clustering can be added later without changing the data model.
-- The entity-type registry + jsonb metadata is what delivers the spec's "never redesign to add a category" guarantee.
+- Grid-hash uses `floor(ST_X(location) / step)` and `floor(ST_Y(location) / step)` grouped, so it benefits from the existing GIST index for the bbox pre-filter but does the grouping on already-filtered rows. Fast even at 10M rows because the bbox is what shrinks the working set.
+- Cluster centroid is `AVG(lng), AVG(lat)` within the cell — good enough visually; upgrading to `ST_Centroid(ST_Collect(location))` is a one-line swap later if needed.
+- Client debouncing prevents burst queries during rotate; TanStack Query dedupes identical bbox+precision keys, so revisiting the same view is free.
+- Search + filters are pushed into the cluster RPC too, so "show only businesses in Europe" clusters correctly.
+- No breaking changes to existing routes, RLS, or auth. The manage dashboard, entity detail, create flow, and current point behavior are untouched.
 
-## Next milestones (not built now)
+## What this unlocks
 
-Auth (email + Google) & ownership → Marketplace/Wallet → AI recommendations & search → Live/messaging → Ads & analytics dashboards → Admin/mobile. Each attaches to the entity engine established here.
+Once clusters exist, later phases (AI semantic search, ads, live streams, analytics dashboards) can all render aggregated overlays on the Earth without any additional map work — they just feed their own cluster/point data into the same layers.
