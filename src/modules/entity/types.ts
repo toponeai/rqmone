@@ -42,3 +42,10 @@ export interface EntityDetail {
   lng: number;
   createdAt: string;
 }
+
+/** An entity owned by the current user (dashboard). */
+export interface MyEntity extends EntityDetail {
+  published: boolean;
+  updatedAt: string;
+}
+
