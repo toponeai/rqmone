@@ -101,6 +101,17 @@ function EarthHome() {
     navigate({ to: "/entity/$id", params: { id } });
   };
 
+  const requireAuthThenCreate = () => {
+    if (authLoading) return;
+    if (!user) {
+      navigate({ to: "/auth", search: { redirect: "/" } });
+      return;
+    }
+    setPickedCoords(null);
+    setDialogOpen(true);
+  };
+
+
   return (
     <main className="relative h-screen w-screen overflow-hidden bg-background">
       {/* The living Earth — always present behind everything. */}
