@@ -158,15 +158,15 @@ function EarthHome() {
             </div>
 
             <Button
-              onClick={() => {
-                setPickedCoords(null);
-                setDialogOpen(true);
-              }}
+              onClick={requireAuthThenCreate}
               className="h-11 gap-2 shadow-lg"
             >
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">Add to Earth</span>
             </Button>
+
+            <AuthMenu />
+
           </div>
 
           {/* Type filters */}
