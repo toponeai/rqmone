@@ -6,6 +6,8 @@ import { Search, Plus, Globe2, X, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { AuthMenu } from "@/components/auth-menu";
+import { useSession } from "@/hooks/use-session";
 
 import { InteractiveEarth } from "@/modules/maps/InteractiveEarth";
 import { CreateEntityDialog } from "@/modules/entity/CreateEntityDialog";
@@ -19,6 +21,7 @@ import {
   ENTITY_TYPE_LIST,
 } from "@/modules/config/entity-types";
 
+
 export const Route = createFileRoute("/")({
   component: EarthHome,
 });
@@ -26,7 +29,10 @@ export const Route = createFileRoute("/")({
 function EarthHome() {
   const navigate = useNavigate();
 
+  const { user, loading: authLoading } = useSession();
+
   const [rawQuery, setRawQuery] = useState("");
+
   const [query, setQuery] = useState("");
   const [activeTypes, setActiveTypes] = useState<EntityType[]>([]);
   const [resultsOpen, setResultsOpen] = useState(false);
@@ -95,6 +101,17 @@ function EarthHome() {
     navigate({ to: "/entity/$id", params: { id } });
   };
 
+  const requireAuthThenCreate = () => {
+    if (authLoading) return;
+    if (!user) {
+      navigate({ to: "/auth", search: { redirect: "/" } });
+      return;
+    }
+    setPickedCoords(null);
+    setDialogOpen(true);
+  };
+
+
   return (
     <main className="relative h-screen w-screen overflow-hidden bg-background">
       {/* The living Earth — always present behind everything. */}
@@ -141,15 +158,15 @@ function EarthHome() {
             </div>
 
             <Button
-              onClick={() => {
-                setPickedCoords(null);
-                setDialogOpen(true);
-              }}
+              onClick={requireAuthThenCreate}
               className="h-11 gap-2 shadow-lg"
             >
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">Add to Earth</span>
             </Button>
+
+            <AuthMenu />
+
           </div>
 
           {/* Type filters */}
