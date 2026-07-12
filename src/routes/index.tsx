@@ -6,6 +6,8 @@ import { Search, Plus, Globe2, X, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { AuthMenu } from "@/components/auth-menu";
+import { useSession } from "@/hooks/use-session";
 
 import { InteractiveEarth } from "@/modules/maps/InteractiveEarth";
 import { CreateEntityDialog } from "@/modules/entity/CreateEntityDialog";
@@ -18,6 +20,7 @@ import {
   ENTITY_TYPE_CONFIG,
   ENTITY_TYPE_LIST,
 } from "@/modules/config/entity-types";
+
 
 export const Route = createFileRoute("/")({
   component: EarthHome,
