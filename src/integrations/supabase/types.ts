@@ -318,6 +318,26 @@ export type Database = {
         | { Args: { schema_name: string; table_name: string }; Returns: string }
         | { Args: { table_name: string }; Returns: string }
       enablelongtransactions: { Args: never; Returns: string }
+      entities_cluster: {
+        Args: {
+          filter_types?: Database["public"]["Enums"]["entity_type"][]
+          max_lat: number
+          max_lng: number
+          max_results?: number
+          min_lat: number
+          min_lng: number
+          p_precision?: number
+          search_query?: string
+        }
+        Returns: {
+          cluster_key: string
+          cluster_type: Database["public"]["Enums"]["entity_type"]
+          cnt: number
+          lat: number
+          lng: number
+          sample_id: string
+        }[]
+      }
       entities_in_viewport: {
         Args: {
           filter_types?: Database["public"]["Enums"]["entity_type"][]

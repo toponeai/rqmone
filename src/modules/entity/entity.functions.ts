@@ -8,6 +8,7 @@ import type {
   EntityPoint,
   EntitySearchResult,
   MyEntity,
+  EntityCluster,
 } from "./types";
 
 const entityTypeSchema = z.enum(["business", "property", "event", "product"]);
@@ -29,6 +30,38 @@ const viewportSchema = z.object({
   types: z.array(entityTypeSchema).optional(),
   q: z.string().max(200).optional(),
 });
+
+const clusterSchema = viewportSchema.extend({
+  precision: z.number().int().min(2).max(14).default(5),
+});
+
+export const getEntityClusters = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) => clusterSchema.parse(input))
+  .handler(async ({ data }): Promise<EntityCluster[]> => {
+    const supabase = publicClient();
+    const { data: rows, error } = await supabase.rpc("entities_cluster", {
+      min_lng: data.minLng,
+      min_lat: data.minLat,
+      max_lng: data.maxLng,
+      max_lat: data.maxLat,
+      p_precision: data.precision,
+      filter_types: data.types && data.types.length ? data.types : undefined,
+      search_query: data.q && data.q.length ? data.q : undefined,
+      max_results: 500,
+    });
+    if (error) {
+      console.error("[entities_cluster]", error.message);
+      return [];
+    }
+    return (rows ?? []).map((r) => ({
+      clusterKey: r.cluster_key,
+      lat: r.lat,
+      lng: r.lng,
+      count: r.cnt,
+      type: r.cluster_type,
+      sampleId: r.sample_id,
+    }));
+  });
 
 export const getEntitiesInViewport = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => viewportSchema.parse(input))

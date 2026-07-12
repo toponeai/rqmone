@@ -14,12 +14,21 @@ import { CreateEntityDialog } from "@/modules/entity/CreateEntityDialog";
 import {
   getEntitiesInViewport,
   searchEntities,
+  getEntityClusters,
 } from "@/modules/entity/entity.functions";
-import type { EntityType } from "@/modules/entity/types";
+import type { EntityCluster, EntityType } from "@/modules/entity/types";
 import {
   ENTITY_TYPE_CONFIG,
   ENTITY_TYPE_LIST,
 } from "@/modules/config/entity-types";
+import {
+  altitudeToZoom,
+  bboxKey,
+  cameraToBbox,
+  RAW_POINTS_PRECISION_THRESHOLD,
+  zoomToPrecision,
+  type GlobeCamera,
+} from "@/modules/maps/viewport";
 
 
 export const Route = createFileRoute("/")({
@@ -44,6 +53,16 @@ function EarthHome() {
     lng: number;
   } | null>(null);
 
+  // Camera state: default to the "in space" starting altitude so the first
+  // render (before the globe emits onViewChange) still fetches sensibly.
+  const [camera, setCamera] = useState<GlobeCamera>({
+    lat: 20,
+    lng: 0,
+    altitude: 2.5,
+  });
+  // A one-shot camera destination — new object each intent so the globe flies.
+  const [flyTo, setFlyTo] = useState<{ lat: number; lng: number; altitude?: number } | null>(null);
+
   // Debounce the search input.
   useEffect(() => {
     const t = setTimeout(() => setQuery(rawQuery.trim()), 300);
@@ -51,12 +70,39 @@ function EarthHome() {
   }, [rawQuery]);
 
   const typesKey = activeTypes.slice().sort().join(",");
+  const bbox = useMemo(() => cameraToBbox(camera), [camera]);
+  const zoom = altitudeToZoom(camera.altitude);
+  const precision = zoomToPrecision(zoom);
+  const showRawPoints = precision >= RAW_POINTS_PRECISION_THRESHOLD;
+  const viewportKey = bboxKey(bbox, precision);
 
   const pointsQuery = useQuery({
-    queryKey: ["entities", "points", query, typesKey],
+    queryKey: ["entities", "points", viewportKey, query, typesKey],
+    enabled: showRawPoints,
     queryFn: () =>
       getEntitiesInViewport({
         data: {
+          minLng: bbox.minLng,
+          minLat: bbox.minLat,
+          maxLng: bbox.maxLng,
+          maxLat: bbox.maxLat,
+          types: activeTypes.length ? activeTypes : undefined,
+          q: query || undefined,
+        },
+      }),
+  });
+
+  const clustersQuery = useQuery({
+    queryKey: ["entities", "clusters", viewportKey, query, typesKey],
+    enabled: !showRawPoints,
+    queryFn: () =>
+      getEntityClusters({
+        data: {
+          minLng: bbox.minLng,
+          minLat: bbox.minLat,
+          maxLng: bbox.maxLng,
+          maxLat: bbox.maxLat,
+          precision,
           types: activeTypes.length ? activeTypes : undefined,
           q: query || undefined,
         },
@@ -76,13 +122,21 @@ function EarthHome() {
   });
 
   const points = pointsQuery.data ?? [];
+  const clusters = clustersQuery.data ?? [];
   const results = listQuery.data ?? [];
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
-    for (const p of points) c[p.type] = (c[p.type] ?? 0) + 1;
+    // In cluster mode, sum the counts; in point mode, tally by point type.
+    if (showRawPoints) {
+      for (const p of points) c[p.type] = (c[p.type] ?? 0) + 1;
+    } else {
+      for (const cl of clusters) {
+        if (cl.type) c[cl.type] = (c[cl.type] ?? 0) + cl.count;
+      }
+    }
     return c;
-  }, [points]);
+  }, [points, clusters, showRawPoints]);
 
   const toggleType = (type: EntityType) => {
     setActiveTypes((prev) =>
@@ -101,6 +155,20 @@ function EarthHome() {
     navigate({ to: "/entity/$id", params: { id } });
   };
 
+  const handleClusterClick = (cluster: EntityCluster) => {
+    // Single-entity clusters open the entity directly.
+    if (cluster.count === 1 && cluster.sampleId) {
+      openDetail(cluster.sampleId);
+      return;
+    }
+    // Otherwise, fly in by ~2 levels. Halving altitude ≈ +1 zoom.
+    const nextAlt = Math.max(
+      0.05,
+      cluster.count > 100 ? camera.altitude / 2.5 : camera.altitude / 3,
+    );
+    setFlyTo({ lat: cluster.lat, lng: cluster.lng, altitude: nextAlt });
+  };
+
   const requireAuthThenCreate = () => {
     if (authLoading) return;
     if (!user) {
@@ -116,10 +184,14 @@ function EarthHome() {
     <main className="relative h-screen w-screen overflow-hidden bg-background">
       {/* The living Earth — always present behind everything. */}
       <InteractiveEarth
-        points={points}
+        points={showRawPoints ? points : []}
+        clusters={showRawPoints ? [] : clusters}
         onPointClick={openDetail}
         onGlobeClick={handleGlobeClick}
         picking={picking}
+        onClusterClick={handleClusterClick}
+        onViewChange={setCamera}
+        flyTo={flyTo}
       />
 
       {/* Ambient vignette for legibility of overlays. */}
@@ -188,7 +260,9 @@ function EarthHome() {
                 >
                   <Icon className="h-3.5 w-3.5" />
                   {c.plural}
-                  <span className="opacity-70">{counts[c.type] ?? 0}</span>
+                  {counts[c.type] ? (
+                    <span className="opacity-70">{counts[c.type]}</span>
+                  ) : null}
                 </button>
               );
             })}
@@ -264,7 +338,12 @@ function EarthHome() {
       {/* Footer hint */}
       <div className="pointer-events-none absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-card/60 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur">
         <MapPin className="h-3 w-3" />
-        {points.length.toLocaleString()} entities on Earth · drag to rotate
+        {showRawPoints
+          ? `${points.length.toLocaleString()} entities in view`
+          : `${clusters
+              .reduce((sum, c) => sum + c.count, 0)
+              .toLocaleString()} entities in view · ${clusters.length} clusters`}
+        {" · scroll to zoom"}
       </div>
 
       <CreateEntityDialog
