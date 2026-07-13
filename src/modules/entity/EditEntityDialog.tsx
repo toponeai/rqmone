@@ -138,9 +138,7 @@ export function EditEntityDialog({ entity, open, onOpenChange }: Props) {
                     id={`edit-${field.key}`}
                     value={meta[field.key] ?? ""}
                     placeholder={field.placeholder}
-                    onChange={(e) =>
-                      setMeta((prev) => ({ ...prev, [field.key]: e.target.value }))
-                    }
+                    onChange={(e) => setMeta((prev) => ({ ...prev, [field.key]: e.target.value }))}
                   />
                 </div>
               ))}

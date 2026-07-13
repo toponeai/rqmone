@@ -78,22 +78,21 @@ export function AuthMenu() {
               {initials || <UserIcon className="h-3 w-3" />}
             </AvatarFallback>
           </Avatar>
-          <span className="hidden max-w-32 truncate text-sm sm:inline">
-            {displayName}
-          </span>
+          <span className="hidden max-w-32 truncate text-sm sm:inline">{displayName}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel className="truncate">
-          {user.email ?? displayName}
-        </DropdownMenuLabel>
+        <DropdownMenuLabel className="truncate">{user.email ?? displayName}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => navigate({ to: "/manage" })}>
           <Layers className="mr-2 h-4 w-4" />
           Your entities
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
+        <DropdownMenuItem
+          onClick={handleSignOut}
+          className="text-destructive focus:text-destructive"
+        >
           <LogOut className="mr-2 h-4 w-4" />
           Sign out
         </DropdownMenuItem>

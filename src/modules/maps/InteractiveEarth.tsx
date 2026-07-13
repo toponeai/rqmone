@@ -37,7 +37,8 @@ function makeClusterEl(cluster: EntityCluster, color: string): HTMLDivElement {
     "transition: transform 120ms ease",
     "pointer-events: auto",
   ].join(";");
-  el.textContent = cluster.count > 999 ? `${(cluster.count / 1000).toFixed(1)}k` : String(cluster.count);
+  el.textContent =
+    cluster.count > 999 ? `${(cluster.count / 1000).toFixed(1)}k` : String(cluster.count);
   el.title = `${cluster.count} entities`;
   el.addEventListener("mouseenter", () => (el.style.transform = "scale(1.1)"));
   el.addEventListener("mouseleave", () => (el.style.transform = "scale(1)"));
@@ -89,8 +90,7 @@ export function InteractiveEarth({
     if (!mounted) return;
     const el = containerRef.current;
     if (!el) return;
-    const update = () =>
-      setSize({ width: el.clientWidth, height: el.clientHeight });
+    const update = () => setSize({ width: el.clientWidth, height: el.clientHeight });
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
@@ -157,16 +157,16 @@ export function InteractiveEarth({
   useEffect(() => {
     const g = globeRef.current;
     if (!g || !flyTo) return;
-    g.pointOfView(
-      { lat: flyTo.lat, lng: flyTo.lng, altitude: flyTo.altitude ?? 1.2 },
-      900,
-    );
+    g.pointOfView({ lat: flyTo.lat, lng: flyTo.lng, altitude: flyTo.altitude ?? 1.2 }, 900);
   }, [flyTo]);
 
   // Clean up the debounce timer.
-  useEffect(() => () => {
-    if (viewTimerRef.current) clearTimeout(viewTimerRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (viewTimerRef.current) clearTimeout(viewTimerRef.current);
+    },
+    [],
+  );
 
   return (
     <div

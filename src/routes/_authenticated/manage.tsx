@@ -28,11 +28,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-import {
-  getMyEntities,
-  deleteEntity,
-  updateEntity,
-} from "@/modules/entity/entity.functions";
+import { getMyEntities, deleteEntity, updateEntity } from "@/modules/entity/entity.functions";
 import { ENTITY_TYPE_CONFIG } from "@/modules/config/entity-types";
 import type { MyEntity } from "@/modules/entity/types";
 import { EditEntityDialog } from "@/modules/entity/EditEntityDialog";
@@ -43,7 +39,8 @@ export const Route = createFileRoute("/_authenticated/manage")({
       { title: "Your entities — R.Q.M.1" },
       {
         name: "description",
-        content: "Manage the businesses, properties, events and products you've placed on the Earth.",
+        content:
+          "Manage the businesses, properties, events and products you've placed on the Earth.",
       },
     ],
   }),
@@ -206,11 +203,7 @@ function ManagePage() {
                         onClick={() => togglePublish.mutate(e)}
                         disabled={togglePublish.isPending}
                       >
-                        {e.published ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
+                        {e.published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
                       <Button
                         variant="ghost"
@@ -244,10 +237,7 @@ function ManagePage() {
         onOpenChange={(open) => !open && setEditing(null)}
       />
 
-      <AlertDialog
-        open={!!confirmDelete}
-        onOpenChange={(open) => !open && setConfirmDelete(null)}
-      >
+      <AlertDialog open={!!confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Remove this entity from Earth?</AlertDialogTitle>

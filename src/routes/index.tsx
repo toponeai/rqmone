@@ -17,10 +17,7 @@ import {
   getEntityClusters,
 } from "@/modules/entity/entity.functions";
 import type { EntityCluster, EntityType } from "@/modules/entity/types";
-import {
-  ENTITY_TYPE_CONFIG,
-  ENTITY_TYPE_LIST,
-} from "@/modules/config/entity-types";
+import { ENTITY_TYPE_CONFIG, ENTITY_TYPE_LIST } from "@/modules/config/entity-types";
 import {
   altitudeToZoom,
   bboxKey,
@@ -29,7 +26,6 @@ import {
   zoomToPrecision,
   type GlobeCamera,
 } from "@/modules/maps/viewport";
-
 
 export const Route = createFileRoute("/")({
   component: EarthHome,
@@ -179,7 +175,6 @@ function EarthHome() {
     setDialogOpen(true);
   };
 
-
   return (
     <main className="relative h-screen w-screen overflow-hidden bg-background">
       {/* The living Earth — always present behind everything. */}
@@ -229,16 +224,12 @@ function EarthHome() {
               />
             </div>
 
-            <Button
-              onClick={requireAuthThenCreate}
-              className="h-11 gap-2 shadow-lg"
-            >
+            <Button onClick={requireAuthThenCreate} className="h-11 gap-2 shadow-lg">
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">Add to Earth</span>
             </Button>
 
             <AuthMenu />
-
           </div>
 
           {/* Type filters */}
@@ -260,9 +251,7 @@ function EarthHome() {
                 >
                   <Icon className="h-3.5 w-3.5" />
                   {c.plural}
-                  {counts[c.type] ? (
-                    <span className="opacity-70">{counts[c.type]}</span>
-                  ) : null}
+                  {counts[c.type] ? <span className="opacity-70">{counts[c.type]}</span> : null}
                 </button>
               );
             })}
@@ -318,9 +307,7 @@ function EarthHome() {
                           <Icon className="h-4 w-4" />
                         </span>
                         <span className="min-w-0">
-                          <span className="block truncate text-sm font-medium">
-                            {r.title}
-                          </span>
+                          <span className="block truncate text-sm font-medium">{r.title}</span>
                           <span className="block truncate text-xs text-muted-foreground">
                             {r.description || c.label}
                           </span>

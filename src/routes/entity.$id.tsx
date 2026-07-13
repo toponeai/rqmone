@@ -1,9 +1,4 @@
-import {
-  createFileRoute,
-  Link,
-  notFound,
-  useRouter,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, MapPin } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -20,10 +15,7 @@ export const Route = createFileRoute("/entity/$id")({
   head: ({ loaderData }) => {
     if (!loaderData) {
       return {
-        meta: [
-          { title: "Entity not found — R.Q.M.1" },
-          { name: "robots", content: "noindex" },
-        ],
+        meta: [{ title: "Entity not found — R.Q.M.1" }, { name: "robots", content: "noindex" }],
       };
     }
     const label = ENTITY_TYPE_CONFIG[loaderData.type].label;
@@ -44,10 +36,7 @@ export const Route = createFileRoute("/entity/$id")({
   },
   component: EntityDetail,
   errorComponent: ({ error }) => (
-    <CenteredMessage
-      title="This entity didn't load"
-      body={error.message}
-    />
+    <CenteredMessage title="This entity didn't load" body={error.message} />
   ),
   notFoundComponent: () => (
     <CenteredMessage
@@ -125,9 +114,7 @@ function EntityDetail() {
           </p>
 
           {entity.description && (
-            <p className="mt-4 text-sm leading-relaxed text-foreground/90">
-              {entity.description}
-            </p>
+            <p className="mt-4 text-sm leading-relaxed text-foreground/90">{entity.description}</p>
           )}
 
           {metaEntries.length > 0 && (
