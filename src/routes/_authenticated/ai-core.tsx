@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, Link, useServerFn } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
@@ -21,7 +22,7 @@ import {
 } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { supabase } from "@/integrations/supabase/client";
-import { loadAiCoreHistory, clearAiCoreHistory } from "@/lib/ai-core.functions";
+import { loadAiCoreHistory, clearAiCoreHistory, type StoredAiMessage } from "@/lib/ai-core.functions";
 
 export const Route = createFileRoute("/_authenticated/ai-core")({
   head: () => ({
@@ -49,7 +50,7 @@ function AiCorePage() {
 
   const initialMessages = useMemo<UIMessage[]>(
     () =>
-      (historyQuery.data ?? []).map((m) => ({
+      (historyQuery.data ?? []).map((m: StoredAiMessage) => ({
         id: m.id,
         role: m.role as UIMessage["role"],
         parts: (m.parts as UIMessage["parts"]) ?? [],
