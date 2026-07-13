@@ -1,11 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
-import type { UIMessage } from "ai";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+export type StoredAiMessage = {
+  id: string;
+  role: string;
+  parts: unknown;
+};
+
 export const loadAiCoreHistory = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<UIMessage[]> => {
+  .handler(async ({ context }): Promise<StoredAiMessage[]> => {
     const { data, error } = await context.supabase
       .from("ai_core_messages")
       .select("id, role, parts, created_at")
@@ -13,8 +18,8 @@ export const loadAiCoreHistory = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return (data ?? []).map((row) => ({
       id: row.id,
-      role: row.role as UIMessage["role"],
-      parts: (row.parts as UIMessage["parts"]) ?? [],
+      role: row.role,
+      parts: row.parts,
     }));
   });
 
