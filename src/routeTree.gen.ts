@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EntityIdRouteImport } from './routes/entity.$id'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedManageRouteImport } from './routes/_authenticated/manage'
 
 const AuthRoute = AuthRouteImport.update({
@@ -34,6 +35,11 @@ const EntityIdRoute = EntityIdRouteImport.update({
   path: '/entity/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedManageRoute = AuthenticatedManageRouteImport.update({
   id: '/manage',
   path: '/manage',
@@ -44,12 +50,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/manage': typeof AuthenticatedManageRoute
+  '/api/chat': typeof ApiChatRoute
   '/entity/$id': typeof EntityIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/manage': typeof AuthenticatedManageRoute
+  '/api/chat': typeof ApiChatRoute
   '/entity/$id': typeof EntityIdRoute
 }
 export interface FileRoutesById {
@@ -58,19 +66,21 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/manage': typeof AuthenticatedManageRoute
+  '/api/chat': typeof ApiChatRoute
   '/entity/$id': typeof EntityIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/manage' | '/entity/$id'
+  fullPaths: '/' | '/auth' | '/manage' | '/api/chat' | '/entity/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/manage' | '/entity/$id'
+  to: '/' | '/auth' | '/manage' | '/api/chat' | '/entity/$id'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/manage'
+    | '/api/chat'
     | '/entity/$id'
   fileRoutesById: FileRoutesById
 }
@@ -78,6 +88,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiChatRoute: typeof ApiChatRoute
   EntityIdRoute: typeof EntityIdRoute
 }
 
@@ -111,6 +122,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EntityIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/manage': {
       id: '/_authenticated/manage'
       path: '/manage'
@@ -136,6 +154,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiChatRoute: ApiChatRoute,
   EntityIdRoute: EntityIdRoute,
 }
 export const routeTree = rootRouteImport
