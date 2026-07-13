@@ -1,87 +1,77 @@
-# R.Q.M.1 — Milestone 3: Earth scale-up (Phase 3 finishing)
+# Galaxy OS — Staged Rebuild Plan
 
-Prepare the interactive Earth for 10M+ entities. Today the globe fetches up to 2,000 points across the whole planet regardless of what you're looking at — fine for a demo, breaks past ~50k entities. This milestone adds true **viewport-driven loading** and **server-side clustering**, so the Earth stays fluid at any scale.
+The full spec (galaxy scene + 9 real modules + AI Core) is 10+ milestones of work. Doing it in one pass would guarantee bugs and instability, which directly violates your "never sacrifice stability for new features" rule. So we ship in stages, each stage independently stable and shippable.
 
-## What you'll get
+---
 
-- **Server-side clustering** — from space you see aggregated clusters ("2,341 entities in this region") instead of thousands of individual pins.
-- **Zoom-to-cluster** — click a cluster and the globe smoothly zooms into that region, revealing its child clusters or individual points.
-- **Viewport-driven queries** — the Earth only fetches what's visible in the current camera view, with 300ms debounce as you rotate/zoom.
-- **Zoom-adaptive precision** — as you zoom in, the server splits clusters into finer cells automatically. Zoom in far enough and you see individual entities.
-- **Same look and feel** — clusters use the existing type colors; the search bar, filters and "Add to Earth" flow all keep working unchanged.
+## Stage 1 — Stabilization Sweep (this stage)
 
-## Architecture
+Goal: zero known errors on the current Earth platform before any galaxy work starts. Nothing new is added.
 
-### Backend: grid-hash clustering (PostGIS)
+### Audit pass (read-only, first)
+- Run TypeScript compile + ESLint across the repo, capture every error/warning.
+- Run the Supabase linter for RLS / grant / policy issues.
+- Read production + preview server-function logs for runtime errors.
+- Load `/`, `/auth`, `/manage`, `/entity/$id` in a headless browser; capture console errors, network 4xx/5xx, and screenshots.
+- Inspect the globe for: memory leaks (ResizeObserver / debounce timers / three.js dispose), animation stutters, cluster re-render loops, camera event listener leaks on unmount.
+- Verify every route in `routeTree.gen.ts` renders and every `<Link>` target exists.
 
-New RPC `entities_cluster(bbox, precision, filter_types, search_query)` that quantizes each entity's coordinates onto a grid whose cell size is derived from `precision` (higher precision = finer cells), groups by cell, and returns:
+### Fix pass (only real findings)
+- TypeScript errors → fix at source.
+- Runtime errors in console/logs → root-cause and fix.
+- Broken routes / missing components → repair.
+- Three.js / globe leaks → add proper cleanup in `useEffect` returns, dispose geometries/materials on unmount, remove `controls('change')` listener.
+- RLS/grant gaps → migration.
+- Build warnings that indicate real bugs (not just noise) → fix.
 
-```text
-cluster_key  text           -- deterministic per cell
-lat, lng     double         -- centroid of the cell
-count        integer        -- number of entities in the cell
-type         entity_type?   -- dominant type when the cell is single-type, else null
-sample_id    uuid?          -- when count = 1, the actual entity id (so click opens detail directly)
-```
+Deliverable: clean build, clean console on every route, clean linter, documented list of what was found and fixed. No feature work.
 
-Why grid-hash and not `ST_ClusterKMeans`: KMeans is O(N) *per query* and non-deterministic (clusters flicker as the viewport shifts). Grid-hashing is a single indexed `GROUP BY floor(lng/step), floor(lat/step)` — stable, fast, and gets faster as PostGIS narrows the bbox with the existing GIST index. Clusters at the same zoom appear in the same place every time.
+### Note on "Firestore errors"
+This project runs on Lovable Cloud (Postgres), not Firestore — treating that line in the spec as a template copy-paste and auditing the actual stack, per your answer.
 
-Precision → step-size table (roughly one screen ≈ 30 cells across at each zoom):
+---
 
-```text
-precision 3   → ~10°     (viewing continents)
-precision 5   → ~2.5°    (large countries)
-precision 7   → ~0.6°    (metro area)
-precision 9   → ~0.15°   (neighborhood)
-precision 11+ → return raw points instead of clusters
-```
+## Stage 2 — Galaxy Shell (next stage, separate plan)
 
-The existing `entities_in_viewport` RPC keeps working for the highest zoom levels; the client picks between them based on camera altitude.
+Wrap the existing app in a galaxy scene:
+- New `/` = galaxy view. AI Core sphere at center. ~9 planets on slow orbits.
+- Existing Earth interactive globe becomes the "Earth / TOPONE Web OS" planet — clicking Earth flies the camera in and mounts the current homepage.
+- Other 8 planets open "coming soon" shells (real modules land in Stage 3+).
+- Space environment: starfield, nebula, dust, subtle bloom, deep-space background.
+- Hover glow + info card, click-to-fly camera, back button flies out.
+- Orbits are slow (30–120s per revolution) so planets are easy to click.
+- Performance budget: 60fps target, frustum culling, LOD on planets, texture compression, lazy-loaded scene chunk.
 
-### Frontend: viewport-aware map
+Existing routes (`/manage`, `/auth`, `/entity/$id`) stay reachable via the top nav — the galaxy is an entry surface, not a replacement for working URLs.
 
-- `InteractiveEarth` gains an `onViewChange({ bbox, zoom })` callback fired from `controls`' change event, debounced 300ms.
-- New `src/modules/maps/viewport.ts` helpers: derive a lat/lng bbox from the globe camera (lat, lng, altitude), and map altitude → zoom → precision.
-- `src/routes/index.tsx` holds viewport state, switches between `getEntityClusters` (low zoom) and `getEntitiesInViewport` (high zoom) via one `useQuery` per view.
-- Globe layers:
-  - **Points layer** — unchanged, used at high zoom.
-  - **Clusters layer** — rendered via globe-gl's `htmlElementsData` (small circular badges showing count, sized by `log10(count)`). Cluster color = dominant type color or neutral primary when mixed.
-- Click a cluster → `pointOfView` animates to its centroid with a lower altitude, which triggers a new fetch at higher precision. Click a cluster whose `count === 1` → open the entity directly.
-- Search + type filters flow into both RPCs unchanged.
+## Stage 3+ — Real Modules, One Per Milestone
 
-### Data flow at a glance
+Each planet becomes a real app in its own milestone (your "build them for real" answer). Order proposed:
+1. Moon — Messaging (owner↔visitor chat, realtime, notifications)
+2. Venus — Wallet (Stripe, balances, transactions)
+3. Mars — Real Estate (entity subtype + listings UI)
+4. Neptune — AI Marketplace (Lovable AI agents catalog)
+5. Mercury — Analytics (per-owner dashboards)
+6. Saturn — Cloud Devices
+7. Jupiter — DubAI
+8. Uranus — Security center
+9. Pluto — Admin center
 
-```text
-camera change ──debounce 300ms──▶ derive bbox, zoom, precision
-                                   │
-                          precision ≤ 10 ?
-                          ┌──── yes ────┐        ┌──── no ────┐
-                          ▼             ▼        ▼            ▼
-                    getEntityClusters              getEntitiesInViewport
-                          │                              │
-                          ▼                              ▼
-                    cluster badges                  individual points
-                    (click → zoom in)               (click → detail)
-```
+Each module ships Dashboard / Settings / Analytics / Notifications / AI Assistant tabs, backed by real tables + RLS.
 
-## Build steps
+## Stage 4 — AI Command Center
 
-1. **Migration**: `entities_cluster` RPC (grid-hash `GROUP BY` on lat/lng cells, sizes derived from `precision`); add a partial GIST index `entities_location_published_gist` on `location` WHERE `published = true` for faster viewport queries at scale.
-2. **Server functions**: add `getEntityClusters` in `src/modules/entity/entity.functions.ts`; extend `getEntitiesInViewport` to actually respect the passed bbox (already does — verify).
-3. **Viewport helpers** in `src/modules/maps/viewport.ts`: `cameraToBbox({lat, lng, altitude})`, `altitudeToZoom`, `zoomToPrecision`.
-4. **`InteractiveEarth`** emits `onViewChange({ bbox, zoom, altitude })` from a debounced `controls('change')` handler, and accepts a new `clusters` prop rendered as `htmlElementsData`.
-5. **Homepage** (`src/routes/index.tsx`) tracks viewport, chooses cluster vs point query, wires cluster clicks to zoom-in. Existing search/filter/create UX unchanged.
-6. **Seed**: expand demo seed to ~2,000 entities (bulk-inserted across cities world-wide) so clustering is visibly meaningful in the demo. Existing hand-written seeds stay.
-7. **Verify**: rotate/zoom the globe — cluster badges appear at low zoom with sensible counts; zooming in splits them; zooming to street level shows individual entities; adding a new entity appears in the correct cluster after invalidation.
+The center AI Core becomes a real command surface: cross-module semantic search (pgvector), open-any-module intents, run workflows, monitor platform health. Requires Stages 1–3.
 
-## Technical notes
+---
 
-- Grid-hash uses `floor(ST_X(location) / step)` and `floor(ST_Y(location) / step)` grouped, so it benefits from the existing GIST index for the bbox pre-filter but does the grouping on already-filtered rows. Fast even at 10M rows because the bbox is what shrinks the working set.
-- Cluster centroid is `AVG(lng), AVG(lat)` within the cell — good enough visually; upgrading to `ST_Centroid(ST_Collect(location))` is a one-line swap later if needed.
-- Client debouncing prevents burst queries during rotate; TanStack Query dedupes identical bbox+precision keys, so revisiting the same view is free.
-- Search + filters are pushed into the cluster RPC too, so "show only businesses in Europe" clusters correctly.
-- No breaking changes to existing routes, RLS, or auth. The manage dashboard, entity detail, create flow, and current point behavior are untouched.
+## What I'll deliver if you approve
 
-## What this unlocks
+Stage 1 only. I will:
+1. Run the audit tools listed above in parallel.
+2. Report the findings.
+3. Fix them.
+4. Verify each route is clean.
+5. Hand back a stable baseline and ask for approval to start Stage 2.
 
-Once clusters exist, later phases (AI semantic search, ads, live streams, analytics dashboards) can all render aggregated overlays on the Earth without any additional map work — they just feed their own cluster/point data into the same layers.
+Approve to start the audit.
