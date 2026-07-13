@@ -23,7 +23,8 @@ export const Route = createFileRoute("/auth")({
       { title: "Sign in — R.Q.M.1" },
       {
         name: "description",
-        content: "Sign in to R.Q.M.1 to place your business, property, event or product on the living Earth.",
+        content:
+          "Sign in to R.Q.M.1 to place your business, property, event or product on the living Earth.",
       },
     ],
   }),
@@ -140,11 +141,7 @@ function GoogleButton({ redirectTo }: { redirectTo: string }) {
       onClick={handleClick}
       disabled={loading}
     >
-      {loading ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        <GoogleIcon className="h-4 w-4" />
-      )}
+      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <GoogleIcon className="h-4 w-4" />}
       Continue with Google
     </Button>
   );
@@ -153,7 +150,10 @@ function GoogleButton({ redirectTo }: { redirectTo: string }) {
 function GoogleIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden>
-      <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.75-6-6.15S8.7 5.9 12 5.9c1.9 0 3.15.8 3.9 1.5l2.65-2.55C16.95 3.35 14.7 2.4 12 2.4 6.9 2.4 2.75 6.55 2.75 11.65S6.9 20.9 12 20.9c6.95 0 9.25-4.85 9.25-7.4 0-.5-.05-.9-.15-1.3H12z"/>
+      <path
+        fill="#EA4335"
+        d="M12 10.2v3.9h5.5c-.24 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.75-6-6.15S8.7 5.9 12 5.9c1.9 0 3.15.8 3.9 1.5l2.65-2.55C16.95 3.35 14.7 2.4 12 2.4 6.9 2.4 2.75 6.55 2.75 11.65S6.9 20.9 12 20.9c6.95 0 9.25-4.85 9.25-7.4 0-.5-.05-.9-.15-1.3H12z"
+      />
     </svg>
   );
 }

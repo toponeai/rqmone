@@ -10,12 +10,7 @@ export type JsonValue =
 
 export type EntityType = "business" | "property" | "event" | "product";
 
-export const ENTITY_TYPES: EntityType[] = [
-  "business",
-  "property",
-  "event",
-  "product",
-];
+export const ENTITY_TYPES: EntityType[] = ["business", "property", "event", "product"];
 
 /** Lightweight point used to render entities on the globe. */
 export interface EntityPoint {
@@ -43,7 +38,6 @@ export interface EntityCluster {
   sampleId: string | null;
 }
 
-
 /** Full entity detail. */
 export interface EntityDetail {
   id: string;
@@ -61,4 +55,3 @@ export interface MyEntity extends EntityDetail {
   published: boolean;
   updatedAt: string;
 }
-
