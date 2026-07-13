@@ -13,7 +13,9 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EntityIdRouteImport } from './routes/entity.$id'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedManageRouteImport } from './routes/_authenticated/manage'
+import { Route as AuthenticatedAiCoreRouteImport } from './routes/_authenticated/ai-core'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -34,22 +36,36 @@ const EntityIdRoute = EntityIdRouteImport.update({
   path: '/entity/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedManageRoute = AuthenticatedManageRouteImport.update({
   id: '/manage',
   path: '/manage',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAiCoreRoute = AuthenticatedAiCoreRouteImport.update({
+  id: '/ai-core',
+  path: '/ai-core',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/ai-core': typeof AuthenticatedAiCoreRoute
   '/manage': typeof AuthenticatedManageRoute
+  '/api/chat': typeof ApiChatRoute
   '/entity/$id': typeof EntityIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/ai-core': typeof AuthenticatedAiCoreRoute
   '/manage': typeof AuthenticatedManageRoute
+  '/api/chat': typeof ApiChatRoute
   '/entity/$id': typeof EntityIdRoute
 }
 export interface FileRoutesById {
@@ -57,20 +73,30 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/ai-core': typeof AuthenticatedAiCoreRoute
   '/_authenticated/manage': typeof AuthenticatedManageRoute
+  '/api/chat': typeof ApiChatRoute
   '/entity/$id': typeof EntityIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/manage' | '/entity/$id'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/ai-core'
+    | '/manage'
+    | '/api/chat'
+    | '/entity/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/manage' | '/entity/$id'
+  to: '/' | '/auth' | '/ai-core' | '/manage' | '/api/chat' | '/entity/$id'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/ai-core'
     | '/_authenticated/manage'
+    | '/api/chat'
     | '/entity/$id'
   fileRoutesById: FileRoutesById
 }
@@ -78,6 +104,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiChatRoute: typeof ApiChatRoute
   EntityIdRoute: typeof EntityIdRoute
 }
 
@@ -111,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EntityIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/manage': {
       id: '/_authenticated/manage'
       path: '/manage'
@@ -118,14 +152,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedManageRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/ai-core': {
+      id: '/_authenticated/ai-core'
+      path: '/ai-core'
+      fullPath: '/ai-core'
+      preLoaderRoute: typeof AuthenticatedAiCoreRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAiCoreRoute: typeof AuthenticatedAiCoreRoute
   AuthenticatedManageRoute: typeof AuthenticatedManageRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAiCoreRoute: AuthenticatedAiCoreRoute,
   AuthenticatedManageRoute: AuthenticatedManageRoute,
 }
 
@@ -136,18 +179,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiChatRoute: ApiChatRoute,
   EntityIdRoute: EntityIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

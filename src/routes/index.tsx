@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Plus, Globe2, X, MapPin } from "lucide-react";
+import { Search, Plus, Globe2, X, MapPin, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -227,6 +227,17 @@ function EarthHome() {
             <Button onClick={requireAuthThenCreate} className="h-11 gap-2 shadow-lg">
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">Add to Earth</span>
+            </Button>
+
+            <Button
+              asChild
+              variant="outline"
+              className="h-11 gap-2 border-primary/40 bg-card/70 backdrop-blur"
+            >
+              <Link to="/ai-core">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span className="hidden sm:inline">AI Core</span>
+              </Link>
             </Button>
 
             <AuthMenu />
