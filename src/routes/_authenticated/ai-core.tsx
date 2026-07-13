@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -134,7 +134,6 @@ function ChatSurface({
     transport,
   });
 
-  const [input, setInput] = useState("");
   const isStreaming = status === "submitted" || status === "streaming";
 
   useEffect(() => {
@@ -192,22 +191,15 @@ function ChatSurface({
 
       <div className="border-t border-border/60 bg-card/40 p-3 backdrop-blur">
         <PromptInput
-          onSubmit={(_msg, event) => {
-            event.preventDefault();
-            const text = input.trim();
+          onSubmit={(msg) => {
+            const text = (msg.text ?? "").trim();
             if (!text || isStreaming) return;
             void sendMessage({ text });
-            setInput("");
           }}
         >
-          <PromptInputTextarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Message the AI Core…"
-            autoFocus
-          />
+          <PromptInputTextarea placeholder="Message the AI Core…" autoFocus />
           <PromptInputFooter className="justify-end">
-            <PromptInputSubmit status={status} disabled={!input.trim() || isStreaming} />
+            <PromptInputSubmit status={status} disabled={isStreaming} />
           </PromptInputFooter>
         </PromptInput>
       </div>
