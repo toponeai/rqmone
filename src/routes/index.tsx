@@ -117,8 +117,8 @@ function EarthHome() {
     enabled: resultsOpen || query.length > 0,
   });
 
-  const points = pointsQuery.data ?? [];
-  const clusters = clustersQuery.data ?? [];
+  const points = useMemo(() => pointsQuery.data ?? [], [pointsQuery.data]);
+  const clusters = useMemo(() => clustersQuery.data ?? [], [clustersQuery.data]);
   const results = listQuery.data ?? [];
 
   const counts = useMemo(() => {
