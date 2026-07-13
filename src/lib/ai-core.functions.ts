@@ -2,11 +2,12 @@ import { createServerFn } from "@tanstack/react-start";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-export type StoredAiMessagePart = { type: string; text?: string; [key: string]: unknown };
+type JsonPrimitive = string | number | boolean | null;
+type JsonValue = JsonPrimitive | JsonValue[] | { [k: string]: JsonValue };
 export type StoredAiMessage = {
   id: string;
   role: string;
-  parts: StoredAiMessagePart[];
+  parts: JsonValue;
 };
 
 export const loadAiCoreHistory = createServerFn({ method: "GET" })
@@ -20,7 +21,7 @@ export const loadAiCoreHistory = createServerFn({ method: "GET" })
     return (data ?? []).map((row) => ({
       id: row.id,
       role: row.role,
-      parts: (row.parts as StoredAiMessagePart[]) ?? [],
+      parts: (row.parts as JsonValue) ?? [],
     }));
   });
 
