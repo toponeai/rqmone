@@ -17,7 +17,9 @@ import { BottomNav } from "./layers/BottomNav";
 import { CommandPaletteLayer } from "./layers/CommandPaletteLayer";
 import { NotificationLayer } from "./layers/NotificationLayer";
 import { ShellCreateDialog } from "./layers/ShellCreateDialog";
+import { PlanetNavigator } from "./layers/PlanetNavigator";
 import { WindowManager } from "@/os/windows/WindowManager";
+import { useNotificationsRealtime } from "@/modules/notifications/realtime";
 
 /**
  * AppShell — the permanent operating system of R.Q.M.1.
