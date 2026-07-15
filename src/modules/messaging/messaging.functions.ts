@@ -50,8 +50,9 @@ export const listConversations = createServerFn({ method: "GET" })
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(200);
-    const lastByConv = new Map<string, (typeof recent)[number] | undefined>();
-    for (const m of recent ?? []) {
+    type RecentMsg = { id: string; conversation_id: string; body: string; sender_id: string; created_at: string; deleted_at: string | null };
+    const lastByConv = new Map<string, RecentMsg>();
+    for (const m of (recent ?? []) as RecentMsg[]) {
       if (!lastByConv.has(m.conversation_id)) lastByConv.set(m.conversation_id, m);
     }
 
