@@ -12,7 +12,7 @@ export interface AppNotificationRow {
   link: string | null;
   actor_id: string | null;
   entity_id: string | null;
-  metadata: Record<string, unknown>;
+  metadata: Record<string, string | number | boolean | null>;
   read_at: string | null;
   archived_at: string | null;
   created_at: string;
