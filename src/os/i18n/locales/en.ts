@@ -58,6 +58,18 @@ export const en = {
   "messages.noMessages": "No messages yet.",
   "messages.startPrompt": "Send the first message to break the ice.",
   "messages.inputPlaceholder": "Type a message… (Enter to send, Shift+Enter for newline)",
+  "notifications.empty": "You're all caught up.",
+  "notifications.markAll": "Mark all read",
+  "notifications.dismiss": "Dismiss",
+  "notifications.signInPrompt": "Sign in to see notifications.",
+  "nav.planets": "Planets",
+  "nav.close": "Close",
+  "galaxy.core": "Core",
+  "galaxy.comms": "Communication",
+  "galaxy.market": "Marketplace",
+  "galaxy.economy": "Economy",
+  "galaxy.analytics": "Analytics",
+  "galaxy.admin": "Administration",
 };
 
 export type Dictionary = typeof en;
