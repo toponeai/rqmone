@@ -1,3 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+
 import { cn } from "@/lib/utils";
 import {
   AdminIcon,
@@ -10,6 +13,8 @@ import {
 } from "@/os/icons";
 import { useT } from "@/os/i18n";
 import { useNotificationStore } from "@/os/stores/notification.store";
+import { unreadNotificationsCount } from "@/modules/notifications/notifications.functions";
+import { useSession } from "@/hooks/use-session";
 
 interface DockItem {
   id: string;
@@ -23,7 +28,16 @@ interface DockItem {
 export function RightDock() {
   const t = useT();
   const toggleNotifications = useNotificationStore((s) => s.togglePanel);
-  const unread = useNotificationStore((s) => s.items.filter((i) => !i.read).length);
+  const { user } = useSession();
+  const getCount = useServerFn(unreadNotificationsCount);
+  const unreadQ = useQuery({
+    queryKey: ["notifications", "unread-count"],
+    queryFn: () => getCount({}),
+    enabled: !!user,
+    staleTime: 20_000,
+    refetchOnWindowFocus: true,
+  });
+  const unread = unreadQ.data ?? 0;
 
   const items: DockItem[] = [
     { id: "profile", labelKey: "nav.profile", icon: UserIcon, disabled: true },
