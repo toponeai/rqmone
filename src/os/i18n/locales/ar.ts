@@ -53,4 +53,11 @@ export const ar: Dictionary = {
   "module.marketplace.soon": "شراء وبيع المنتجات عبر كل كوكب على الأرض — قريبًا.",
   "module.community.soon": "المتابعات والتغذيات والأحياء حول الكيانات — قريبًا.",
   "module.live.soon": "غرف مباشرة وبث وتدفقات مرتبطة بالموقع — قريبًا.",
+  "messages.empty": "اختر محادثة لبدء الدردشة.",
+  "messages.emptyList": "لا توجد محادثات بعد. ابدأ واحدة لإلقاء التحية.",
+  "messages.new": "جديدة",
+  "messages.untitled": "بدون عنوان",
+  "messages.noMessages": "لا توجد رسائل بعد.",
+  "messages.startPrompt": "أرسل أول رسالة لكسر الجليد.",
+  "messages.inputPlaceholder": "اكتب رسالة… (Enter للإرسال، Shift+Enter لسطر جديد)",
 };
