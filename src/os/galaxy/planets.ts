@@ -70,8 +70,8 @@ export const PLANETS: Planet[] = [
     icon: MessagesIcon,
     color: "#34d399",
     size: 38,
-    status: "soon",
-    soonKey: "module.messages.soon",
+    status: "ready",
+    route: "/messages",
   },
   {
     id: "wallet",
