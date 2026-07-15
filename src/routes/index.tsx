@@ -22,6 +22,7 @@ import {
 } from "@/modules/maps/viewport";
 import { useSearchStore } from "@/os/stores/search.store";
 import { useCreateStore } from "@/os/stores/create.store";
+import { PlanetRing } from "@/os/galaxy/PlanetRing";
 
 export const Route = createFileRoute("/")({
   component: EarthHome,
@@ -167,6 +168,10 @@ function EarthHome() {
 
       {/* Ambient vignette for legibility of overlays. */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/70 via-transparent to-background/60" />
+
+      {/* Galaxy Planet Ring — module navigation orbiting the Earth. */}
+      <PlanetRing />
+
 
       {/* Picking banner */}
       {picking && (
