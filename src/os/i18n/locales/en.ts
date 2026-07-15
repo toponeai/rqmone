@@ -37,6 +37,20 @@ export const en = {
   "window.restore": "Restore",
   "window.close": "Close",
   "window.pin": "Pin",
+  "module.earth": "Earth",
+  "module.ai": "AI Core",
+  "module.manage": "Your entities",
+  "module.messages": "Messages",
+  "module.wallet": "Wallet",
+  "module.marketplace": "Marketplace",
+  "module.community": "Community",
+  "module.live": "Live",
+  "module.soon.body": "This module is on the roadmap and will land in an upcoming stage.",
+  "module.messages.soon": "Direct messages, group chats, and entity threads — coming soon.",
+  "module.wallet.soon": "Payments, ledgers, and payouts across the Galaxy — coming soon.",
+  "module.marketplace.soon": "Buy and sell products across every planet on Earth — coming soon.",
+  "module.community.soon": "Follows, feeds, and neighborhoods around entities — coming soon.",
+  "module.live.soon": "Live rooms, broadcasts, and location-anchored streams — coming soon.",
 };
 
 export type Dictionary = typeof en;
