@@ -127,7 +127,7 @@ function ConversationList({
           <ul className="p-2 space-y-1">
             {conversations.map((c) => {
               const label =
-                c.title ??
+                c.title ||
                 c.counterparts.map((p) => p.display_name || "Unknown").join(", ") ||
                 t("messages.untitled");
               return (
