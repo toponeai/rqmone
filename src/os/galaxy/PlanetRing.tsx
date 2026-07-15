@@ -2,10 +2,14 @@ import { useMemo, useState } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 
 import { useT } from "@/os/i18n";
+import type { en } from "@/os/i18n/locales/en";
 import { useSession } from "@/hooks/use-session";
 import { useWindowStore } from "@/os/stores/window.store";
 import { PLANETS, type Planet } from "./planets";
 import { ComingSoonModule } from "./ComingSoonModule";
+
+type TKey = keyof typeof en;
+
 
 /**
  * Galaxy Planet Ring — orbital overlay showing every top-level module as a
