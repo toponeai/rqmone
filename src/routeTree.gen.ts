@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EntityIdRouteImport } from './routes/entity.$id'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedManageRouteImport } from './routes/_authenticated/manage'
 import { Route as AuthenticatedAiCoreRouteImport } from './routes/_authenticated/ai-core'
 
@@ -41,6 +42,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedManageRoute = AuthenticatedManageRouteImport.update({
   id: '/manage',
   path: '/manage',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/ai-core': typeof AuthenticatedAiCoreRoute
   '/manage': typeof AuthenticatedManageRoute
+  '/messages': typeof AuthenticatedMessagesRoute
   '/api/chat': typeof ApiChatRoute
   '/entity/$id': typeof EntityIdRoute
 }
@@ -65,6 +72,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/ai-core': typeof AuthenticatedAiCoreRoute
   '/manage': typeof AuthenticatedManageRoute
+  '/messages': typeof AuthenticatedMessagesRoute
   '/api/chat': typeof ApiChatRoute
   '/entity/$id': typeof EntityIdRoute
 }
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/ai-core': typeof AuthenticatedAiCoreRoute
   '/_authenticated/manage': typeof AuthenticatedManageRoute
+  '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/api/chat': typeof ApiChatRoute
   '/entity/$id': typeof EntityIdRoute
 }
@@ -85,10 +94,18 @@ export interface FileRouteTypes {
     | '/auth'
     | '/ai-core'
     | '/manage'
+    | '/messages'
     | '/api/chat'
     | '/entity/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/ai-core' | '/manage' | '/api/chat' | '/entity/$id'
+  to:
+    | '/'
+    | '/auth'
+    | '/ai-core'
+    | '/manage'
+    | '/messages'
+    | '/api/chat'
+    | '/entity/$id'
   id:
     | '__root__'
     | '/'
@@ -96,6 +113,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/ai-core'
     | '/_authenticated/manage'
+    | '/_authenticated/messages'
     | '/api/chat'
     | '/entity/$id'
   fileRoutesById: FileRoutesById
@@ -145,6 +163,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/messages': {
+      id: '/_authenticated/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof AuthenticatedMessagesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/manage': {
       id: '/_authenticated/manage'
       path: '/manage'
@@ -165,11 +190,13 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAiCoreRoute: typeof AuthenticatedAiCoreRoute
   AuthenticatedManageRoute: typeof AuthenticatedManageRoute
+  AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAiCoreRoute: AuthenticatedAiCoreRoute,
   AuthenticatedManageRoute: AuthenticatedManageRoute,
+  AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
