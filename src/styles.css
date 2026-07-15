@@ -156,3 +156,95 @@
     font-family: var(--font-display);
   }
 }
+
+/* ============ R.Q.M.1 motion + moon primitives ============ */
+
+@keyframes rqm-orbit {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes rqm-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes rqm-scale-in {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+@keyframes rqm-breathe {
+  0%, 100% { transform: translateY(0) scale(1); filter: brightness(1); }
+  50%      { transform: translateY(-3px) scale(1.04); filter: brightness(1.12); }
+}
+
+@keyframes rqm-aurora {
+  0%   { transform: rotate(0deg) scale(1.05); opacity: 0.7; }
+  50%  { transform: rotate(180deg) scale(1.15); opacity: 1; }
+  100% { transform: rotate(360deg) scale(1.05); opacity: 0.7; }
+}
+
+.rqm-moon {
+  --moon-size: 64px;
+  width: var(--moon-size);
+  height: var(--moon-size);
+  animation: rqm-breathe 5.5s ease-in-out infinite;
+  will-change: transform, filter;
+  transform: translateZ(0);
+}
+
+.rqm-moon.rqm-moon-lg { --moon-size: 112px; }
+
+.rqm-moon .rqm-moon-core {
+  position: absolute;
+  inset: 6%;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 32% 30%, oklch(0.96 0.02 220) 0%, oklch(0.82 0.06 220) 22%, oklch(0.42 0.08 260) 65%, oklch(0.18 0.06 265) 100%);
+  box-shadow:
+    inset -8px -12px 24px rgba(0,0,0,0.55),
+    inset 6px 8px 18px rgba(255,255,255,0.14),
+    0 0 40px oklch(0.78 0.14 200 / 0.55),
+    0 0 80px oklch(0.55 0.20 300 / 0.35);
+}
+
+.rqm-moon .rqm-moon-highlight {
+  position: absolute;
+  top: 12%;
+  left: 18%;
+  width: 26%;
+  height: 22%;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(255,255,255,0.9), rgba(255,255,255,0) 70%);
+  filter: blur(1px);
+  opacity: 0.7;
+}
+
+.rqm-moon .rqm-moon-aurora {
+  position: absolute;
+  inset: -25%;
+  border-radius: 9999px;
+  background: conic-gradient(
+    from 0deg,
+    oklch(0.78 0.14 200 / 0.0),
+    oklch(0.78 0.14 200 / 0.55),
+    oklch(0.65 0.22 300 / 0.55),
+    oklch(0.85 0.16 160 / 0.45),
+    oklch(0.78 0.14 200 / 0.0)
+  );
+  filter: blur(14px);
+  animation: rqm-aurora 12s linear infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.rqm-moon[data-open="true"] .rqm-moon-aurora { animation-duration: 6s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rqm-moon,
+  .rqm-moon .rqm-moon-aurora {
+    animation: none !important;
+  }
+}
+
