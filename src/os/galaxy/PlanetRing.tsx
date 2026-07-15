@@ -45,7 +45,7 @@ export function PlanetRing() {
     }
     openWindow({
       id: `module:${p.id}`,
-      title: t(p.labelKey),
+      title: t(p.labelKey as TKey),
       render: ComingSoonModule,
       props: { planet: p },
       w: 440,
@@ -130,7 +130,7 @@ export function PlanetRing() {
                 onClick={() => handleClick(planet)}
                 onMouseEnter={() => setHovered(planet.id)}
                 onMouseLeave={() => setHovered(null)}
-                aria-label={t(planet.labelKey)}
+                aria-label={t(planet.labelKey as TKey)}
                 className="group absolute flex items-center justify-center rounded-full border transition-transform will-change-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 style={{
                   left: x,
@@ -156,12 +156,12 @@ export function PlanetRing() {
                     className="absolute -top-1 -right-1 rounded-full border border-white/40 bg-black/70 px-1 text-[8px] font-bold uppercase tracking-wider text-primary"
                     style={{ fontSize: 8 }}
                   >
-                    {t("soon.badge")}
+                    {t("soon.badge" as TKey)}
                   </span>
                 )}
                 {isHover && (
                   <span className="rqm-glass-3 pointer-events-none absolute right-full top-1/2 me-2 -translate-y-1/2 whitespace-nowrap rounded-md px-2 py-1 text-xs">
-                    {t(planet.labelKey)}
+                    {t(planet.labelKey as TKey)}
                   </span>
                 )}
               </button>
