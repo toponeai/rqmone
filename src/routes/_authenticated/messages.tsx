@@ -105,7 +105,7 @@ function ConversationList({
   currentUserId: string;
   onStarted: (id: string) => void;
 }) {
-  const t = useTranslation();
+  const t = useT();
   const [showNew, setShowNew] = useState(false);
   return (
     <aside className="w-full max-w-xs md:w-80 border-r border-border/40 bg-card/40 backdrop-blur flex flex-col">
@@ -222,7 +222,7 @@ function ChatPane({
   currentUserId: string;
   title: string;
 }) {
-  const t = useTranslation();
+  const t = useT();
   const qc = useQueryClient();
   const getFn = useServerFn(getMessages);
   const sendFn = useServerFn(sendMessage);
