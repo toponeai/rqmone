@@ -57,6 +57,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const showRightDock = bp === "desktop";
   const showBottomNav = bp === "mobile";
 
+  // Realtime: subscribe once user is known.
+  useNotificationsRealtime(user?.id ?? null);
+
   return (
     <div className="relative h-dvh w-screen overflow-hidden bg-[var(--rqm-bg)] text-foreground">
       {/* Center workspace hosts route content. h-full/w-full so the Earth
@@ -71,6 +74,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {showRightDock ? <RightDock /> : null}
       {showBottomNav ? <BottomNav /> : null}
 
+      <PlanetNavigator />
       <WindowManager />
       <NotificationLayer />
       <CommandPaletteLayer />
