@@ -92,7 +92,8 @@ export function FloatingWindow({ win }: { win: FloatingWindowDef }) {
         </div>
       </div>
       <div className="flex-1 overflow-auto p-4">
-        <Body {...((win.props ?? {}) as never)} />
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <Body {...(((win.props ?? {}) as unknown) as any)} />
       </div>
     </div>
   );
