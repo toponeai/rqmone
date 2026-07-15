@@ -13,7 +13,7 @@ import {
 } from "@/modules/messaging/messaging.functions";
 import { useMessagesRealtime, useConversationsRealtime } from "@/modules/messaging/realtime";
 import { useSession } from "@/hooks/use-session";
-import { useTranslation } from "@/os/i18n";
+import { useT } from "@/os/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -29,9 +29,9 @@ export const Route = createFileRoute("/_authenticated/messages")({
 
 function MessagesPage() {
   const { c: activeId } = Route.useSearch();
-  const navigate = useNavigate({ from: "/messages" });
+  const navigate = useNavigate();
   const { user } = useSession();
-  const t = useTranslation();
+  const t = useT();
 
   const listFn = useServerFn(listConversations);
   const conversationsQuery = useQuery({
@@ -46,7 +46,7 @@ function MessagesPage() {
   const active = activeId ? conversations.find((c) => c.id === activeId) : undefined;
 
   const setActive = (id: string | undefined) =>
-    navigate({ search: (prev) => ({ ...prev, c: id }) });
+    navigate({ to: "/messages", search: { c: id } });
 
   return (
     <div className="fixed inset-0 top-14 bottom-16 md:bottom-0 flex bg-background">
