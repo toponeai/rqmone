@@ -1,16 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Plus, Globe2, X, MapPin, Sparkles } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { CloseIcon, PinLocationIcon } from "@/os/icons";
 import { cn } from "@/lib/utils";
-import { AuthMenu } from "@/components/auth-menu";
-import { useSession } from "@/hooks/use-session";
 
 import { InteractiveEarth } from "@/modules/maps/InteractiveEarth";
-import { CreateEntityDialog } from "@/modules/entity/CreateEntityDialog";
 import {
   getEntitiesInViewport,
   searchEntities,
@@ -26,6 +20,8 @@ import {
   zoomToPrecision,
   type GlobeCamera,
 } from "@/modules/maps/viewport";
+import { useSearchStore } from "@/os/stores/search.store";
+import { useCreateStore } from "@/os/stores/create.store";
 
 export const Route = createFileRoute("/")({
   component: EarthHome,
@@ -34,20 +30,18 @@ export const Route = createFileRoute("/")({
 function EarthHome() {
   const navigate = useNavigate();
 
-  const { user, loading: authLoading } = useSession();
+  // Shell-owned search + create state.
+  const rawQuery = useSearchStore((s) => s.rawQuery);
+  const commitQuery = useSearchStore((s) => s.commitQuery);
+  const query = useSearchStore((s) => s.query);
+  const activeTypes = useSearchStore((s) => s.activeTypes);
+  const toggleType = useSearchStore((s) => s.toggleType);
+  const clearTypes = useSearchStore((s) => s.clearTypes);
+  const resultsOpen = useSearchStore((s) => s.resultsOpen);
+  const setResultsOpen = useSearchStore((s) => s.setResultsOpen);
 
-  const [rawQuery, setRawQuery] = useState("");
-
-  const [query, setQuery] = useState("");
-  const [activeTypes, setActiveTypes] = useState<EntityType[]>([]);
-  const [resultsOpen, setResultsOpen] = useState(false);
-
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [picking, setPicking] = useState(false);
-  const [pickedCoords, setPickedCoords] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
+  const picking = useCreateStore((s) => s.picking);
+  const setPickedCoords = useCreateStore((s) => s.setPickedCoords);
 
   // Camera state: default to the "in space" starting altitude so the first
   // render (before the globe emits onViewChange) still fetches sensibly.
@@ -61,9 +55,9 @@ function EarthHome() {
 
   // Debounce the search input.
   useEffect(() => {
-    const t = setTimeout(() => setQuery(rawQuery.trim()), 300);
+    const t = setTimeout(() => commitQuery(rawQuery), 300);
     return () => clearTimeout(t);
-  }, [rawQuery]);
+  }, [rawQuery, commitQuery]);
 
   const typesKey = activeTypes.slice().sort().join(",");
   const bbox = useMemo(() => cameraToBbox(camera), [camera]);
@@ -134,17 +128,9 @@ function EarthHome() {
     return c;
   }, [points, clusters, showRawPoints]);
 
-  const toggleType = (type: EntityType) => {
-    setActiveTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
-    );
-  };
-
   const handleGlobeClick = (coords: { lat: number; lng: number }) => {
     if (!picking) return;
     setPickedCoords(coords);
-    setPicking(false);
-    setDialogOpen(true);
   };
 
   const openDetail = (id: string) => {
@@ -165,18 +151,8 @@ function EarthHome() {
     setFlyTo({ lat: cluster.lat, lng: cluster.lng, altitude: nextAlt });
   };
 
-  const requireAuthThenCreate = () => {
-    if (authLoading) return;
-    if (!user) {
-      navigate({ to: "/auth", search: { redirect: "/" } });
-      return;
-    }
-    setPickedCoords(null);
-    setDialogOpen(true);
-  };
-
   return (
-    <main className="relative h-screen w-screen overflow-hidden bg-background">
+    <div className="relative h-full w-full overflow-hidden">
       {/* The living Earth — always present behind everything. */}
       <InteractiveEarth
         points={showRawPoints ? points : []}
@@ -194,57 +170,16 @@ function EarthHome() {
 
       {/* Picking banner */}
       {picking && (
-        <div className="absolute left-1/2 top-24 z-30 -translate-x-1/2 animate-pulse rounded-full border border-primary/40 bg-card/90 px-4 py-2 text-sm font-medium text-primary shadow-lg backdrop-blur">
+        <div className="absolute left-1/2 top-20 z-30 -translate-x-1/2 animate-pulse rounded-full border border-primary/40 bg-card/90 px-4 py-2 text-sm font-medium text-primary shadow-lg backdrop-blur">
           Click anywhere on Earth to set the location
         </div>
       )}
 
-      {/* Top bar */}
-      <header className="absolute inset-x-0 top-0 z-20 p-4 sm:p-6">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 pr-2">
-              <Globe2 className="h-6 w-6 text-primary" />
-              <span className="text-lg font-bold tracking-tight">
-                R.Q.M.<span className="text-primary">1</span>
-              </span>
-            </div>
-
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={rawQuery}
-                onChange={(e) => {
-                  setRawQuery(e.target.value);
-                  setResultsOpen(true);
-                }}
-                onFocus={() => setResultsOpen(true)}
-                placeholder="Search the planet — businesses, properties, events, products…"
-                className="h-11 border-border/60 bg-card/80 pl-9 backdrop-blur"
-              />
-            </div>
-
-            <Button onClick={requireAuthThenCreate} className="h-11 gap-2 shadow-lg">
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add to Earth</span>
-            </Button>
-
-            <Button
-              asChild
-              variant="outline"
-              className="h-11 gap-2 border-primary/40 bg-card/70 backdrop-blur"
-            >
-              <Link to="/ai-core">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <span className="hidden sm:inline">AI Core</span>
-              </Link>
-            </Button>
-
-            <AuthMenu />
-          </div>
-
-          {/* Type filters */}
-          <div className="flex flex-wrap items-center gap-2">
+      {/* Type-filter chips — Earth-specific workspace overlay under the TopNav. */}
+      <div
+        className="absolute inset-x-0 top-16 z-10 flex justify-center px-4"
+      >
+        <div className="rqm-glass-1 flex max-w-full flex-wrap items-center gap-2 rounded-full px-2 py-1.5">
             {ENTITY_TYPE_LIST.map((c) => {
               const active = activeTypes.includes(c.type);
               const Icon = c.icon;
@@ -253,10 +188,10 @@ function EarthHome() {
                   key={c.type}
                   onClick={() => toggleType(c.type)}
                   className={cn(
-                    "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium backdrop-blur transition-colors",
+                    "flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors",
                     active
                       ? "border-transparent text-background"
-                      : "border-border/60 bg-card/70 text-foreground hover:bg-card",
+                      : "border-white/10 bg-white/5 text-foreground hover:bg-white/10",
                   )}
                   style={active ? { backgroundColor: c.color } : undefined}
                 >
@@ -268,19 +203,18 @@ function EarthHome() {
             })}
             {activeTypes.length > 0 && (
               <button
-                onClick={() => setActiveTypes([])}
+                onClick={clearTypes}
                 className="text-xs text-muted-foreground underline-offset-2 hover:underline"
               >
                 Clear
               </button>
             )}
-          </div>
         </div>
-      </header>
+      </div>
 
       {/* Results panel */}
       {resultsOpen && (
-        <aside className="absolute bottom-4 left-4 top-40 z-20 flex w-[22rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-border/60 bg-card/85 shadow-2xl backdrop-blur-md">
+        <aside className="rqm-glass-2 absolute bottom-4 start-20 top-32 z-10 flex w-[22rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl">
           <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
             <h2 className="text-sm font-semibold">
               {query ? `Results for "${query}"` : "Discover"}
@@ -290,7 +224,7 @@ function EarthHome() {
               className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
               aria-label="Close results"
             >
-              <X className="h-4 w-4" />
+              <CloseIcon className="h-4 w-4" />
             </button>
           </div>
           <div className="flex-1 overflow-y-auto">
@@ -335,7 +269,7 @@ function EarthHome() {
 
       {/* Footer hint */}
       <div className="pointer-events-none absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-card/60 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur">
-        <MapPin className="h-3 w-3" />
+        <PinLocationIcon className="h-3 w-3" />
         {showRawPoints
           ? `${points.length.toLocaleString()} entities in view`
           : `${clusters
@@ -343,16 +277,6 @@ function EarthHome() {
               .toLocaleString()} entities in view · ${clusters.length} clusters`}
         {" · scroll to zoom"}
       </div>
-
-      <CreateEntityDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        coords={pickedCoords}
-        onRequestPick={() => {
-          setDialogOpen(false);
-          setPicking(true);
-        }}
-      />
-    </main>
+    </div>
   );
 }

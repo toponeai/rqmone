@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -33,6 +33,7 @@ interface CreateEntityDialogProps {
   onOpenChange: (open: boolean) => void;
   coords: { lat: number; lng: number } | null;
   onRequestPick: () => void;
+  initialType?: EntityType;
 }
 
 export function CreateEntityDialog({
@@ -40,8 +41,13 @@ export function CreateEntityDialog({
   onOpenChange,
   coords,
   onRequestPick,
+  initialType,
 }: CreateEntityDialogProps) {
-  const [type, setType] = useState<EntityType>("business");
+  const [type, setType] = useState<EntityType>(initialType ?? "business");
+
+  useEffect(() => {
+    if (open && initialType) setType(initialType);
+  }, [open, initialType]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [meta, setMeta] = useState<Record<string, string>>({});

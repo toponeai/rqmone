@@ -1,0 +1,113 @@
+/*
+ * R.Q.M.1 Operating System — Design Tokens
+ * Permanent design system. Every color, radius, spacing, elevation,
+ * z-index, duration and easing used across the OS is declared here.
+ * Modules MUST NOT hardcode values.
+ */
+
+:root {
+  /* ---- RQM brand palette ---- */
+  --rqm-primary: oklch(0.82 0.16 205);       /* aurora cyan */
+  --rqm-primary-strong: oklch(0.72 0.19 205);
+  --rqm-secondary: oklch(0.68 0.19 285);     /* violet */
+  --rqm-accent: oklch(0.85 0.19 155);        /* mint aurora */
+  --rqm-warning: oklch(0.83 0.17 85);
+  --rqm-danger: oklch(0.64 0.24 25);
+  --rqm-success: oklch(0.78 0.17 155);
+
+  /* ---- Surfaces ---- */
+  --rqm-bg: oklch(0.15 0.03 264);
+  --rqm-panel: oklch(0.20 0.035 264);
+  --rqm-panel-strong: oklch(0.24 0.035 264);
+  --rqm-border: color-mix(in oklch, white 10%, transparent);
+  --rqm-border-strong: color-mix(in oklch, white 18%, transparent);
+
+  /* ---- Spacing (4px grid) ---- */
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ---- Radius ---- */
+  --rqm-radius-sm: 6px;
+  --rqm-radius-md: 10px;
+  --rqm-radius-lg: 14px;
+  --rqm-radius-xl: 20px;
+  --rqm-radius-2xl: 28px;
+  --rqm-radius-full: 9999px;
+
+  /* ---- Elevation ---- */
+  --elev-1: 0 1px 2px rgb(0 0 0 / 0.35);
+  --elev-2: 0 4px 12px rgb(0 0 0 / 0.4);
+  --elev-3: 0 8px 24px rgb(0 0 0 / 0.45);
+  --elev-4: 0 16px 40px rgb(0 0 0 / 0.5);
+  --elev-5: 0 24px 60px rgb(0 0 0 / 0.55);
+  --elev-aurora: 0 0 40px color-mix(in oklch, var(--rqm-primary) 45%, transparent);
+
+  /* ---- Motion ---- */
+  --dur-fast: 120ms;
+  --dur-base: 220ms;
+  --dur-slow: 420ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ---- Z-index layer contract ---- */
+  --z-earth: 0;
+  --z-workspace: 10;
+  --z-docks: 20;
+  --z-topnav: 30;
+  --z-windows: 40;
+  --z-ai: 50;
+  --z-context: 60;
+  --z-modal: 70;
+  --z-palette: 80;
+  --z-toast: 90;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 1ms;
+    --dur-base: 1ms;
+    --dur-slow: 1ms;
+  }
+}
+
+/* Glass surface tiers — backdrop-filter only (Lightning CSS adds any needed prefixes). */
+@utility rqm-glass-1 {
+  background: color-mix(in oklch, var(--rqm-panel) 55%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid var(--rqm-border);
+}
+@utility rqm-glass-2 {
+  background: color-mix(in oklch, var(--rqm-panel) 70%, transparent);
+  backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid var(--rqm-border);
+  box-shadow: var(--elev-3);
+}
+@utility rqm-glass-3 {
+  background: color-mix(in oklch, var(--rqm-panel-strong) 85%, transparent);
+  backdrop-filter: blur(28px) saturate(160%);
+  border: 1px solid var(--rqm-border-strong);
+  box-shadow: var(--elev-4);
+}
+
+/* Aurora surface (subtle animated gradient for docks/panels). */
+@utility rqm-aurora {
+  background:
+    radial-gradient(ellipse at 20% 0%, color-mix(in oklch, var(--rqm-primary) 18%, transparent), transparent 60%),
+    radial-gradient(ellipse at 80% 100%, color-mix(in oklch, var(--rqm-secondary) 16%, transparent), transparent 60%);
+}
+
+/* Focus ring using ring token. */
+@utility rqm-focus {
+  outline: 2px solid var(--rqm-primary);
+  outline-offset: 2px;
+}

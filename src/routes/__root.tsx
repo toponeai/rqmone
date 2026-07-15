@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { Toaster } from "../components/ui/sonner";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
+import { AppShell } from "@/os/shell/AppShell";
 
 function NotFoundComponent() {
   return (
@@ -152,8 +153,11 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      {/* AppShell hosts every layer (top nav, docks, palette, windows) and
+          renders the current route inside its CenterWorkspace. */}
+      <AppShell>
+        <Outlet />
+      </AppShell>
       <Toaster />
     </QueryClientProvider>
   );
