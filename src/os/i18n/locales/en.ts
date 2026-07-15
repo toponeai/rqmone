@@ -51,6 +51,13 @@ export const en = {
   "module.marketplace.soon": "Buy and sell products across every planet on Earth — coming soon.",
   "module.community.soon": "Follows, feeds, and neighborhoods around entities — coming soon.",
   "module.live.soon": "Live rooms, broadcasts, and location-anchored streams — coming soon.",
+  "messages.empty": "Select a conversation to start chatting.",
+  "messages.emptyList": "No conversations yet. Start one to say hi.",
+  "messages.new": "New",
+  "messages.untitled": "Untitled",
+  "messages.noMessages": "No messages yet.",
+  "messages.startPrompt": "Send the first message to break the ice.",
+  "messages.inputPlaceholder": "Type a message… (Enter to send, Shift+Enter for newline)",
 };
 
 export type Dictionary = typeof en;
