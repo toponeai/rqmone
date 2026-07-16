@@ -91,10 +91,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         property: "og:description",
         content:
-          "Explore a living 3D Earth. Discover and place businesses, properties, events and products anywhere on the planet.",
+          "R.Q.M.1 is a living interactive Earth where every business, property, event and product is discoverable at its real location on the planet.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "R.Q.M.1 — The Interactive Earth" },
+      { name: "twitter:description", content: "R.Q.M.1 is a living interactive Earth where every business, property, event and product is discoverable at its real location on the planet." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/b1bde0fd-b224-4ead-ae55-48117d964845" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/b1bde0fd-b224-4ead-ae55-48117d964845" },
     ],
     links: [
       {
@@ -111,7 +115,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
   shellComponent: RootShell,
