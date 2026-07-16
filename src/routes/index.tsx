@@ -23,6 +23,7 @@ import {
 import { useSearchStore } from "@/os/stores/search.store";
 import { useCreateStore } from "@/os/stores/create.store";
 import { PlanetRing } from "@/os/galaxy/PlanetRing";
+import { Starfield } from "@/os/engines/particles";
 
 export const Route = createFileRoute("/")({
   component: EarthHome,
@@ -154,6 +155,9 @@ function EarthHome() {
 
   return (
     <div className="relative h-full w-full overflow-hidden">
+      {/* Galaxy Engine — deep-space starfield behind Earth. */}
+      <Starfield className="absolute inset-0" />
+
       {/* The living Earth — always present behind everything. */}
       <InteractiveEarth
         points={showRawPoints ? points : []}
