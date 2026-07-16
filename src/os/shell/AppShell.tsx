@@ -20,6 +20,7 @@ import { ShellCreateDialog } from "./layers/ShellCreateDialog";
 import { PlanetNavigator } from "./layers/PlanetNavigator";
 import { WindowManager } from "@/os/windows/WindowManager";
 import { useNotificationsRealtime } from "@/modules/notifications/realtime";
+import { applyTheme, loadStoredTheme } from "@/os/engines/themes";
 
 /**
  * AppShell — the permanent operating system of R.Q.M.1.
@@ -41,6 +42,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   // Register built-in commands once and provide execution context.
   useEffect(() => {
     const dispose = registerBuiltinCommands();
+    applyTheme(loadStoredTheme());
     return dispose;
   }, []);
 
