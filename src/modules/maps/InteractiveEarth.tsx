@@ -185,8 +185,11 @@ export function InteractiveEarth({
             globeImageUrl="/textures/earth-night.jpg"
             bumpImageUrl="/textures/earth-topology.png"
             backgroundImageUrl="/textures/night-sky.png"
+            showAtmosphere
             atmosphereColor="#6fd6ff"
-            atmosphereAltitude={0.18}
+            atmosphereAltitude={0.22}
+            showGraticules={false}
+
             pointsData={points}
             pointLat={(d: object) => (d as EntityPoint).lat}
             pointLng={(d: object) => (d as EntityPoint).lng}

@@ -2,18 +2,74 @@ import { useEffect, useRef, useState } from "react";
 import { CloseIcon, MaximizeIcon, MinimizeIcon, PinIcon } from "@/os/icons";
 import { useWindowStore, type FloatingWindowDef } from "@/os/stores/window.store";
 import { useT } from "@/os/i18n";
+import { anim } from "@/os/engines/motion";
+import { play } from "@/os/engines/sound";
+
+const POS_KEY = "rqm.window.positions";
+
+interface PersistedPos {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+function loadPositions(): Record<string, PersistedPos> {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(window.localStorage.getItem(POS_KEY) ?? "{}");
+  } catch {
+    return {};
+  }
+}
+
+function savePosition(id: string, pos: PersistedPos): void {
+  if (typeof window === "undefined") return;
+  try {
+    const all = loadPositions();
+    all[id] = pos;
+    window.localStorage.setItem(POS_KEY, JSON.stringify(all));
+  } catch {
+    /* ignore */
+  }
+}
 
 export function FloatingWindow({ win }: { win: FloatingWindowDef }) {
   const t = useT();
-  const { close, focus, move, setState, togglePin } = useWindowStore();
+  const { close, focus, move, resize, setState, togglePin } = useWindowStore();
   const Body = win.render;
   const [dragging, setDragging] = useState<{ dx: number; dy: number } | null>(null);
   const nodeRef = useRef<HTMLDivElement>(null);
+  const [closing, setClosing] = useState(false);
+
+  // Restore persisted position/size on first mount.
+  useEffect(() => {
+    const saved = loadPositions()[win.id];
+    if (saved) {
+      move(win.id, saved.x, saved.y);
+      resize(win.id, saved.w, saved.h);
+    }
+    play("window-open");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist on move/resize.
+  useEffect(() => {
+    savePosition(win.id, { x: win.x, y: win.y, w: win.w, h: win.h });
+  }, [win.id, win.x, win.y, win.w, win.h]);
 
   useEffect(() => {
     if (!dragging) return;
     const onMove = (e: MouseEvent) => {
-      move(win.id, e.clientX - dragging.dx, Math.max(56, e.clientY - dragging.dy));
+      const nx = e.clientX - dragging.dx;
+      const ny = Math.max(56, e.clientY - dragging.dy);
+      // Magnetic snap to viewport edges (within 12px).
+      const snap = 12;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const sx = nx < snap ? 0 : nx + win.w > vw - snap ? vw - win.w : nx;
+      const sy = ny + win.h > vh - snap ? vh - win.h : ny;
+      move(win.id, sx, sy);
     };
     const onUp = () => setDragging(null);
     window.addEventListener("mousemove", onMove);
@@ -22,7 +78,13 @@ export function FloatingWindow({ win }: { win: FloatingWindowDef }) {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
     };
-  }, [dragging, move, win.id]);
+  }, [dragging, move, win.id, win.w, win.h]);
+
+  const handleClose = () => {
+    play("window-close");
+    setClosing(true);
+    setTimeout(() => close(win.id), 180);
+  };
 
   if (win.state === "minimized") return null;
 
@@ -44,7 +106,11 @@ export function FloatingWindow({ win }: { win: FloatingWindowDef }) {
       aria-modal="false"
       aria-label={win.title}
       className="rqm-glass-3 pointer-events-auto absolute flex flex-col overflow-hidden rounded-2xl"
-      style={style}
+      style={{
+        ...style,
+        animation: closing ? "rqm-fade-in 180ms ease-in reverse" : anim("scale"),
+        transformOrigin: "50% 60%",
+      }}
       onMouseDown={() => focus(win.id)}
     >
       <div
@@ -84,7 +150,7 @@ export function FloatingWindow({ win }: { win: FloatingWindowDef }) {
           </button>
           <button
             className="rounded-md p-1 hover:bg-red-500/20"
-            onClick={() => close(win.id)}
+            onClick={handleClose}
             aria-label={t("window.close")}
           >
             <CloseIcon className="h-3.5 w-3.5" />
