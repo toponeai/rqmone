@@ -115,12 +115,14 @@ function GoogleButton({ redirectTo }: { redirectTo: string }) {
   const handleClick = async () => {
     setLoading(true);
     try {
-      // Store intended destination in sessionStorage for post-OAuth navigation.
-      if (typeof window !== "undefined" && redirectTo !== "/") {
-        sessionStorage.setItem("rqm1:post-auth-redirect", redirectTo);
-      }
+      // Preserve the intended return path (e.g. an OAuth consent URL) through
+      // the Google round-trip by baking it into redirect_uri directly.
+      const returnTo =
+        redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
+          ? redirectTo
+          : "/";
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}${returnTo}`,
       });
       if (result.error) {
         toast.error("Google sign-in failed", { description: String(result.error) });
