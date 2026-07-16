@@ -13,10 +13,9 @@ export default defineTool({
     description: z.string().max(4000).optional().describe("Optional description."),
     lat: z.number().min(-90).max(90).describe("Latitude in decimal degrees."),
     lng: z.number().min(-180).max(180).describe("Longitude in decimal degrees."),
-    published: z.boolean().optional().describe("Publish immediately (default true)."),
   },
   annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
-  handler: async ({ type, title, description, lat, lng, published }, ctx: ToolContext) => {
+  handler: async ({ type, title, description, lat, lng }, ctx: ToolContext) => {
     if (!ctx.isAuthenticated()) {
       return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     }
@@ -28,17 +27,14 @@ export default defineTool({
         auth: { persistSession: false, autoRefreshToken: false },
       },
     );
-    const { data, error } = await supabase
-      .rpc("create_entity", {
-        p_type: type,
-        p_title: title,
-        p_description: description ?? "",
-        p_lat: lat,
-        p_lng: lng,
-        p_metadata: {},
-        p_published: published ?? true,
-      })
-      .single();
+    const { data, error } = await supabase.rpc("create_entity", {
+      p_type: type,
+      p_title: title,
+      p_description: description ?? "",
+      p_lat: lat,
+      p_lng: lng,
+      p_metadata: {},
+    });
     if (error) {
       return { content: [{ type: "text", text: error.message }], isError: true };
     }
