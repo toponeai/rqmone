@@ -18,7 +18,8 @@ export function WindowManager() {
 
 /** Minimized-window rail rendered inside BottomNav / dock. */
 export function MinimizedRail() {
-  const windows = useWindowStore((s) => s.windows.filter((w) => w.state === "minimized"));
+  const allWindows = useWindowStore((s) => s.windows);
+  const windows = allWindows.filter((w) => w.state === "minimized");
   const setState = useWindowStore((s) => s.setState);
   const focus = useWindowStore((s) => s.focus);
   if (windows.length === 0) return null;
