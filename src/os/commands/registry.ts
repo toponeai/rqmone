@@ -28,13 +28,19 @@ export interface Command {
 
 const REGISTRY = new Map<string, Command>();
 const SUBSCRIBERS = new Set<() => void>();
+let cachedSnapshot: Command[] = [];
+
+function invalidateSnapshot() {
+  cachedSnapshot = Array.from(REGISTRY.values());
+  SUBSCRIBERS.forEach((fn) => fn());
+}
 
 export function registerCommand(cmd: Command): () => void {
   REGISTRY.set(cmd.id, cmd);
-  SUBSCRIBERS.forEach((fn) => fn());
+  invalidateSnapshot();
   return () => {
     REGISTRY.delete(cmd.id);
-    SUBSCRIBERS.forEach((fn) => fn());
+    invalidateSnapshot();
   };
 }
 
@@ -44,7 +50,7 @@ export function registerCommands(cmds: Command[]): () => void {
 }
 
 export function listCommands(): Command[] {
-  return Array.from(REGISTRY.values());
+  return cachedSnapshot;
 }
 
 export function getCommand(id: string): Command | undefined {

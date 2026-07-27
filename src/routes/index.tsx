@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { CloseIcon, PinLocationIcon } from "@/os/icons";
+import { ClientOnly } from "@tanstack/react-router";
+
+import { CloseIcon, PinLocationIcon, EarthIcon, LoaderIcon } from "@/os/icons";
 import { cn } from "@/lib/utils";
 
 import { InteractiveEarth } from "@/modules/maps/InteractiveEarth";
@@ -10,7 +12,7 @@ import {
   searchEntities,
   getEntityClusters,
 } from "@/modules/entity/entity.functions";
-import type { EntityCluster, EntityType } from "@/modules/entity/types";
+import type { EntityCluster } from "@/modules/entity/types";
 import { ENTITY_TYPE_CONFIG, ENTITY_TYPE_LIST } from "@/modules/config/entity-types";
 import {
   altitudeToZoom,
@@ -22,17 +24,156 @@ import {
 } from "@/modules/maps/viewport";
 import { useSearchStore } from "@/os/stores/search.store";
 import { useCreateStore } from "@/os/stores/create.store";
-import { PlanetRing } from "@/os/galaxy/PlanetRing";
-import { Starfield } from "@/os/engines/particles";
+import { useWindowStore } from "@/os/stores/window.store";
+import { useSession } from "@/hooks/use-session";
+import { useGalaxyStore } from "@/os/galaxy3d/useGalaxyStore";
+import { ComingSoonModule } from "@/os/galaxy/ComingSoonModule";
+import { useT } from "@/os/i18n";
+import type { en } from "@/os/i18n/locales/en";
+import type { Planet } from "@/os/galaxy/planets";
+import { play } from "@/os/engines/sound";
+
+const GalaxyScene = lazy(() =>
+  import("@/os/galaxy3d/GalaxyScene").then((m) => ({ default: m.GalaxyScene })),
+);
+
+type TKey = keyof typeof en;
 
 export const Route = createFileRoute("/")({
-  component: EarthHome,
+  head: () => ({
+    meta: [
+      { title: "R.Q.M.1 — Interactive Galaxy" },
+      {
+        name: "description",
+        content:
+          "Explore a living galaxy of modules and dive into an interactive Earth marketplace of businesses, properties, events, and products.",
+      },
+      { property: "og:title", content: "R.Q.M.1 — Interactive Galaxy" },
+      {
+        property: "og:description",
+        content:
+          "A cinematic 3D galaxy operating system. Fly between planet-modules and browse Earth in real time.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: HomeRoute,
 });
 
-function EarthHome() {
+function HomeRoute() {
+  return (
+    <ClientOnly fallback={<GalaxyLoading />}>
+      <HomeShell />
+    </ClientOnly>
+  );
+}
+
+function GalaxyLoading() {
+  return (
+    <div className="grid h-full w-full place-items-center bg-[#02030a] text-white/70">
+      <div className="flex items-center gap-3 text-sm">
+        <LoaderIcon className="h-5 w-5 animate-spin" />
+        Entering the galaxy…
+      </div>
+    </div>
+  );
+}
+
+function HomeShell() {
+  const mode = useGalaxyStore((s) => s.mode);
+  const enterGalaxy = useGalaxyStore((s) => s.enterGalaxy);
+  const enterEarth = useGalaxyStore((s) => s.enterEarth);
+
+  return (
+    <div className="relative h-full w-full overflow-hidden bg-[#02030a]">
+      {mode === "earth" ? (
+        <EarthMarketplace onBack={enterGalaxy} />
+      ) : (
+        <GalaxyView onEnterEarth={enterEarth} />
+      )}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Galaxy view                                                                */
+/* -------------------------------------------------------------------------- */
+
+function GalaxyView({ onEnterEarth }: { onEnterEarth: () => void }) {
+  const t = useT();
+  const navigate = useNavigate();
+  const { user } = useSession();
+  const openWindow = useWindowStore((s) => s.open);
+
+  const handlePlanetClick = (p: Planet) => {
+    play("planet-select");
+    if (p.id === "earth") {
+      play("earth-enter");
+      onEnterEarth();
+      return;
+    }
+    if (p.status === "ready" && p.route) {
+      const needsAuth =
+        p.route.startsWith("/manage") ||
+        p.route.startsWith("/ai-core") ||
+        p.route.startsWith("/messages");
+      if (needsAuth && !user) {
+        navigate({ to: "/auth" });
+        return;
+      }
+      navigate({ to: p.route as never });
+      return;
+    }
+    openWindow({
+      id: `module:${p.id}`,
+      title: t(p.labelKey as TKey),
+      render: ComingSoonModule,
+      props: { planet: p },
+      w: 460,
+      h: 380,
+    });
+  };
+
+  return (
+    <>
+      <Suspense fallback={<GalaxyLoading />}>
+        <GalaxyScene onPlanetClick={handlePlanetClick} />
+      </Suspense>
+
+      {/* Overlay HUD */}
+      <div className="pointer-events-none absolute inset-x-0 top-20 z-10 flex flex-col items-center gap-2 px-4 text-center">
+        <h1 className="rqm-glass-2 pointer-events-auto rounded-full px-4 py-1.5 text-sm font-semibold tracking-widest text-white/90">
+          R.Q.M.1 · GALAXY
+        </h1>
+        <p className="max-w-md text-xs text-white/60">
+          {t("galaxy.core")} — click a planet to open a module. Fly to Earth to browse the marketplace.
+        </p>
+      </div>
+
+      {/* Enter-earth CTA */}
+      <button
+        type="button"
+        onClick={() => {
+          play("earth-enter");
+          onEnterEarth();
+        }}
+        className="rqm-glass-2 pointer-events-auto absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-[#4fb3ff55] px-5 py-2.5 text-sm font-medium text-white shadow-[0_0_30px_rgba(79,179,255,0.35)] transition hover:scale-105 hover:shadow-[0_0_50px_rgba(79,179,255,0.55)]"
+      >
+        <EarthIcon className="h-4 w-4" />
+        Enter Earth
+      </button>
+    </>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Earth marketplace view                                                     */
+/* -------------------------------------------------------------------------- */
+
+function EarthMarketplace({ onBack }: { onBack: () => void }) {
   const navigate = useNavigate();
 
-  // Shell-owned search + create state.
   const rawQuery = useSearchStore((s) => s.rawQuery);
   const commitQuery = useSearchStore((s) => s.commitQuery);
   const query = useSearchStore((s) => s.query);
@@ -45,17 +186,9 @@ function EarthHome() {
   const picking = useCreateStore((s) => s.picking);
   const setPickedCoords = useCreateStore((s) => s.setPickedCoords);
 
-  // Camera state: default to the "in space" starting altitude so the first
-  // render (before the globe emits onViewChange) still fetches sensibly.
-  const [camera, setCamera] = useState<GlobeCamera>({
-    lat: 20,
-    lng: 0,
-    altitude: 2.5,
-  });
-  // A one-shot camera destination — new object each intent so the globe flies.
+  const [camera, setCamera] = useState<GlobeCamera>({ lat: 20, lng: 0, altitude: 2.5 });
   const [flyTo, setFlyTo] = useState<{ lat: number; lng: number; altitude?: number } | null>(null);
 
-  // Debounce the search input.
   useEffect(() => {
     const t = setTimeout(() => commitQuery(rawQuery), 300);
     return () => clearTimeout(t);
@@ -105,10 +238,7 @@ function EarthHome() {
     queryKey: ["entities", "list", query, typesKey],
     queryFn: () =>
       searchEntities({
-        data: {
-          q: query || undefined,
-          types: activeTypes.length ? activeTypes : undefined,
-        },
+        data: { q: query || undefined, types: activeTypes.length ? activeTypes : undefined },
       }),
     enabled: resultsOpen || query.length > 0,
   });
@@ -119,13 +249,10 @@ function EarthHome() {
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
-    // In cluster mode, sum the counts; in point mode, tally by point type.
     if (showRawPoints) {
       for (const p of points) c[p.type] = (c[p.type] ?? 0) + 1;
     } else {
-      for (const cl of clusters) {
-        if (cl.type) c[cl.type] = (c[cl.type] ?? 0) + cl.count;
-      }
+      for (const cl of clusters) if (cl.type) c[cl.type] = (c[cl.type] ?? 0) + cl.count;
     }
     return c;
   }, [points, clusters, showRawPoints]);
@@ -134,18 +261,15 @@ function EarthHome() {
     if (!picking) return;
     setPickedCoords(coords);
   };
-
   const openDetail = (id: string) => {
+    play("market-ping");
     navigate({ to: "/entity/$id", params: { id } });
   };
-
   const handleClusterClick = (cluster: EntityCluster) => {
-    // Single-entity clusters open the entity directly.
     if (cluster.count === 1 && cluster.sampleId) {
       openDetail(cluster.sampleId);
       return;
     }
-    // Otherwise, fly in by ~2 levels. Halving altitude ≈ +1 zoom.
     const nextAlt = Math.max(
       0.05,
       cluster.count > 100 ? camera.altitude / 2.5 : camera.altitude / 3,
@@ -155,10 +279,6 @@ function EarthHome() {
 
   return (
     <div className="relative h-full w-full overflow-hidden">
-      {/* Galaxy Engine — deep-space starfield behind Earth. */}
-      <Starfield className="absolute inset-0" />
-
-      {/* The living Earth — always present behind everything. */}
       <InteractiveEarth
         points={showRawPoints ? points : []}
         clusters={showRawPoints ? [] : clusters}
@@ -170,58 +290,63 @@ function EarthHome() {
         flyTo={flyTo}
       />
 
-      {/* Ambient vignette for legibility of overlays. */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/70 via-transparent to-background/60" />
 
-      {/* Galaxy Planet Ring — module navigation orbiting the Earth. */}
-      <PlanetRing />
+      {/* Back-to-galaxy */}
+      <button
+        type="button"
+        onClick={() => {
+          play("warp-out");
+          onBack();
+        }}
+        className="rqm-glass-2 pointer-events-auto absolute left-4 top-20 z-20 flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-medium text-white/90 hover:text-white"
+        aria-label="Back to galaxy"
+      >
+        ← Galaxy
+      </button>
 
-
-      {/* Picking banner */}
       {picking && (
         <div className="absolute left-1/2 top-20 z-30 -translate-x-1/2 animate-pulse rounded-full border border-primary/40 bg-card/90 px-4 py-2 text-sm font-medium text-primary shadow-lg backdrop-blur">
+          <PinLocationIcon className="mr-1 inline h-3.5 w-3.5" />
           Click anywhere on Earth to set the location
         </div>
       )}
 
-      {/* Type-filter chips — Earth-specific workspace overlay under the TopNav. */}
-      <div
-        className="absolute inset-x-0 top-16 z-10 flex justify-center px-4"
-      >
+      {/* Type-filter chips */}
+      <div className="absolute inset-x-0 top-16 z-10 flex justify-center px-4">
         <div className="rqm-glass-1 flex max-w-full flex-wrap items-center gap-2 rounded-full px-2 py-1.5">
-            {ENTITY_TYPE_LIST.map((c) => {
-              const active = activeTypes.includes(c.type);
-              const Icon = c.icon;
-              return (
-                <button
-                  key={c.type}
-                  onClick={() => toggleType(c.type)}
-                  className={cn(
-                    "flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                    active
-                      ? "border-transparent text-background"
-                      : "border-white/10 bg-white/5 text-foreground hover:bg-white/10",
-                  )}
-                  style={active ? { backgroundColor: c.color } : undefined}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  {c.plural}
-                  {counts[c.type] ? <span className="opacity-70">{counts[c.type]}</span> : null}
-                </button>
-              );
-            })}
-            {activeTypes.length > 0 && (
+          {ENTITY_TYPE_LIST.map((c) => {
+            const active = activeTypes.includes(c.type);
+            const Icon = c.icon;
+            return (
               <button
-                onClick={clearTypes}
-                className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+                key={c.type}
+                onClick={() => toggleType(c.type)}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                  active
+                    ? "border-transparent text-background"
+                    : "border-white/10 bg-white/5 text-foreground hover:bg-white/10",
+                )}
+                style={active ? { backgroundColor: c.color } : undefined}
               >
-                Clear
+                <Icon className="h-3.5 w-3.5" />
+                {c.plural}
+                {counts[c.type] ? <span className="opacity-70">{counts[c.type]}</span> : null}
               </button>
-            )}
+            );
+          })}
+          {activeTypes.length > 0 && (
+            <button
+              onClick={clearTypes}
+              className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+            >
+              Clear
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Results panel */}
       {resultsOpen && (
         <aside className="rqm-glass-2 absolute bottom-4 start-20 top-32 z-10 flex w-[22rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl">
           <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
@@ -260,11 +385,13 @@ function EarthHome() {
                         >
                           <Icon className="h-4 w-4" />
                         </span>
-                        <span className="min-w-0">
+                        <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm font-medium">{r.title}</span>
-                          <span className="block truncate text-xs text-muted-foreground">
-                            {r.description || c.label}
-                          </span>
+                          {r.description ? (
+                            <span className="block truncate text-xs text-muted-foreground">
+                              {r.description}
+                            </span>
+                          ) : null}
                         </span>
                       </button>
                     </li>
@@ -275,17 +402,6 @@ function EarthHome() {
           </div>
         </aside>
       )}
-
-      {/* Footer hint */}
-      <div className="pointer-events-none absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-card/60 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur">
-        <PinLocationIcon className="h-3 w-3" />
-        {showRawPoints
-          ? `${points.length.toLocaleString()} entities in view`
-          : `${clusters
-              .reduce((sum, c) => sum + c.count, 0)
-              .toLocaleString()} entities in view · ${clusters.length} clusters`}
-        {" · scroll to zoom"}
-      </div>
     </div>
   );
 }

@@ -12,7 +12,14 @@ export type SoundName =
   | "window-close"
   | "notification"
   | "ai-response"
-  | "message-received";
+  | "message-received"
+  | "warp-in"
+  | "warp-out"
+  | "planet-approach"
+  | "planet-select"
+  | "earth-enter"
+  | "market-ping"
+  | "pin-hover";
 
 const STORAGE_KEY = "rqm.sound.enabled";
 let ctx: AudioContext | null = null;
@@ -54,7 +61,15 @@ const CUES: Record<SoundName, Tone> = {
   notification: { freq: 720, dur: 0.18, type: "sine", gain: 0.05, slide: 960 },
   "ai-response": { freq: 420, dur: 0.22, type: "sine", gain: 0.04, slide: 660 },
   "message-received": { freq: 560, dur: 0.16, type: "sine", gain: 0.045, slide: 820 },
+  "warp-in": { freq: 180, dur: 0.6, type: "sawtooth", gain: 0.05, slide: 1200 },
+  "warp-out": { freq: 1200, dur: 0.5, type: "sawtooth", gain: 0.05, slide: 140 },
+  "planet-approach": { freq: 300, dur: 0.35, type: "sine", gain: 0.05, slide: 700 },
+  "planet-select": { freq: 660, dur: 0.22, type: "triangle", gain: 0.06, slide: 1100 },
+  "earth-enter": { freq: 220, dur: 0.7, type: "sine", gain: 0.06, slide: 520 },
+  "market-ping": { freq: 980, dur: 0.12, type: "sine", gain: 0.04 },
+  "pin-hover": { freq: 1040, dur: 0.05, type: "sine", gain: 0.025 },
 };
+
 
 export function isSoundEnabled(): boolean {
   return enabled;

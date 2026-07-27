@@ -36,7 +36,12 @@ function savePosition(id: string, pos: PersistedPos): void {
 
 export function FloatingWindow({ win }: { win: FloatingWindowDef }) {
   const t = useT();
-  const { close, focus, move, resize, setState, togglePin } = useWindowStore();
+  const close = useWindowStore((s) => s.close);
+  const focus = useWindowStore((s) => s.focus);
+  const move = useWindowStore((s) => s.move);
+  const resize = useWindowStore((s) => s.resize);
+  const setState = useWindowStore((s) => s.setState);
+  const togglePin = useWindowStore((s) => s.togglePin);
   const Body = win.render;
   const [dragging, setDragging] = useState<{ dx: number; dy: number } | null>(null);
   const nodeRef = useRef<HTMLDivElement>(null);
