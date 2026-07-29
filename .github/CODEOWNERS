@@ -1,0 +1,16 @@
+# Default owners for everything in the repository.
+* @rqm1-owner
+
+# Backend / database
+/supabase/ @rqm1-owner
+/src/integrations/ @rqm1-owner
+/src/lib/mcp/ @rqm1-owner
+
+# Galaxy OS kernel & 3D layer
+/src/os/ @rqm1-owner
+
+# CI, security and repo automation
+/.github/ @rqm1-owner
+
+# Documentation
+/docs/ @rqm1-owner

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or support request
+    url: https://github.com/OWNER/REPO/discussions
+    about: Ask usage questions and get help from the community.
+  - name: Security vulnerability
+    url: https://github.com/OWNER/REPO/security/advisories/new
+    about: Report a vulnerability privately. Never open a public issue for security problems.
