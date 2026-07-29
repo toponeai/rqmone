@@ -2,7 +2,10 @@ node_modules
 dist
 .output
 .vinxi
+.wrangler
+public/textures
 pnpm-lock.yaml
 package-lock.json
 bun.lock
 routeTree.gen.ts
+CHANGELOG.md
