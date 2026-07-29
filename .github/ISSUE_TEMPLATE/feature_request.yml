@@ -1,0 +1,42 @@
+name: Feature request
+description: Suggest a new capability or module for R.Q.M.1
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What user problem does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Target area
+      options:
+        - New entity type / module (planet)
+        - Galaxy OS shell & 3D
+        - Earth marketplace surface
+        - AI Core
+        - Messaging / notifications
+        - Platform & infrastructure
+        - Developer experience
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: architecture
+    attributes:
+      label: Architecture check
+      options:
+        - label: This respects the "everything is an Entity" model (no category-specific schema).
