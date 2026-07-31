@@ -2,44 +2,50 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import type { Database } from "@/integrations/supabase/types";
-
-const SYSTEM_PROMPT = `You are the AI Core of R.Q.M.1 — a living interactive Earth operating system.
-You help the user manage entities they've placed on the planet, understand the platform,
-draft descriptions, brainstorm new categories, and answer questions across their data.
-Be concise, warm, and precise. Use markdown when it improves clarity. Never invent facts about
-the user's account; ask before assuming.`;
+import { getModel } from "@/modules/ai/provider.server";
+import { checkRateLimit, incrementRateLimit, assertRateLimit } from "@/modules/ai/rate-limiter.server";
+import { logAiEvent, startTimer } from "@/modules/ai/logger.server";
+import { sanitizeUserMessage, assertMessageLength } from "@/modules/ai/security";
+import { DEFAULT_SYSTEM_PROMPT, buildSystemPrompt } from "@/modules/ai/templates";
+import type { AiProvider, AiModel } from "@/modules/ai/types";
 
 type ChatRequestBody = {
   message?: UIMessage;
+  conversationId?: string;
 };
+
+function isNewKey(v: string) {
+  return v.startsWith("sb_publishable_") || v.startsWith("sb_secret_");
+}
 
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apiKey = process.env.LOVABLE_API_KEY;
+        const elapsed = startTimer();
+
+        // ── Env check ───────────────────────────────────────────────────────
         const supabaseUrl = process.env.SUPABASE_URL;
         const supabaseKey = process.env.SUPABASE_PUBLISHABLE_KEY;
-        if (!apiKey || !supabaseUrl || !supabaseKey) {
-          return new Response("Server misconfigured", { status: 500 });
+        if (!supabaseUrl || !supabaseKey) {
+          return new Response("Server misconfigured: missing Supabase credentials", {
+            status: 500,
+          });
         }
 
+        // ── Auth ────────────────────────────────────────────────────────────
         const authHeader = request.headers.get("authorization") ?? "";
-        const token = authHeader.startsWith("Bearer ") ? authHeader.slice("Bearer ".length) : null;
+        const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
         if (!token) return new Response("Unauthorized", { status: 401 });
 
-        // Client scoped to the caller — RLS applies as that user.
+        // Supabase client scoped to this user (RLS applies)
         const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
           auth: { persistSession: false, autoRefreshToken: false },
           global: {
             fetch: (input, init) => {
               const h = new Headers(init?.headers);
-              if (
-                supabaseKey.startsWith("sb_") &&
-                h.get("Authorization") === `Bearer ${supabaseKey}`
-              ) {
+              if (isNewKey(supabaseKey) && h.get("Authorization") === `Bearer ${supabaseKey}`) {
                 h.delete("Authorization");
               }
               h.set("apikey", supabaseKey);
@@ -50,68 +56,185 @@ export const Route = createFileRoute("/api/chat")({
         });
 
         const { data: userData, error: userErr } = await supabase.auth.getUser(token);
-        if (userErr || !userData.user) {
-          return new Response("Unauthorized", { status: 401 });
-        }
+        if (userErr || !userData.user) return new Response("Unauthorized", { status: 401 });
         const userId = userData.user.id;
 
+        // ── Rate limit ──────────────────────────────────────────────────────
+        const rateLimit = await checkRateLimit(supabase, userId);
+        if (!rateLimit.allowed) {
+          void logAiEvent(supabase, {
+            user_id: userId,
+            event_type: "rate_limited",
+            metadata: { requests_count: rateLimit.requests_count },
+          });
+          return new Response(
+            JSON.stringify({
+              error: "RATE_LIMITED",
+              message: `Rate limit exceeded. ${rateLimit.requests_count}/${rateLimit.requests_limit} requests this hour. Resets at ${rateLimit.reset_at}.`,
+            }),
+            { status: 429, headers: { "Content-Type": "application/json" } },
+          );
+        }
+
+        // ── Parse body ──────────────────────────────────────────────────────
         let body: ChatRequestBody;
         try {
           body = (await request.json()) as ChatRequestBody;
         } catch {
           return new Response("Invalid JSON", { status: 400 });
         }
+
         const newMessage = body.message;
         if (!newMessage || newMessage.role !== "user" || !Array.isArray(newMessage.parts)) {
-          return new Response("Missing user message", { status: 400 });
+          return new Response("Missing or invalid user message", { status: 400 });
         }
 
-        // Load prior conversation from DB (RLS restricts to this user).
-        const { data: history, error: histErr } = await supabase
-          .from("ai_core_messages")
-          .select("id, role, parts, created_at")
-          .order("created_at", { ascending: true });
-        if (histErr) {
-          return new Response(`Failed to load history: ${histErr.message}`, { status: 500 });
+        // Validate + sanitize message text
+        const textParts = newMessage.parts.filter((p) => p.type === "text");
+        const rawText = textParts.map((p) => ("text" in p ? String(p.text) : "")).join(" ");
+        try {
+          assertMessageLength(rawText);
+        } catch (err) {
+          return new Response((err as Error).message, { status: 400 });
+        }
+        const sanitizedText = sanitizeUserMessage(rawText);
+        const sanitizedParts = newMessage.parts.map((p) =>
+          p.type === "text" ? { ...p, text: sanitizedText } : p,
+        );
+        const sanitizedMessage: UIMessage = { ...newMessage, parts: sanitizedParts };
+
+        // ── Resolve conversation + model ────────────────────────────────────
+        const conversationId = body.conversationId ?? null;
+        let model: AiModel = "google/gemini-2.5-flash";
+        let provider: AiProvider = "lovable-gateway";
+        let systemPrompt = DEFAULT_SYSTEM_PROMPT;
+        let agentId: string | null = null;
+
+        if (conversationId) {
+          const { data: conv } = await supabase
+            .from("ai_conversations")
+            .select("model, provider, agent_id")
+            .eq("id", conversationId)
+            .eq("user_id", userId)
+            .single();
+
+          if (conv) {
+            model = conv.model as AiModel;
+            provider = conv.provider as AiProvider;
+            agentId = conv.agent_id ?? null;
+          }
         }
 
-        const priorMessages: UIMessage[] = (history ?? []).map((row) => ({
-          id: row.id,
-          role: row.role as UIMessage["role"],
-          parts: (row.parts as UIMessage["parts"]) ?? [],
-        }));
+        // If there's an agent, load its system prompt
+        if (agentId) {
+          const { data: agent } = await supabase
+            .from("ai_agents")
+            .select("system_prompt, name")
+            .eq("id", agentId)
+            .single();
+          if (agent) {
+            systemPrompt = buildSystemPrompt(agent.system_prompt, { agentName: agent.name });
+          }
+        }
 
-        // Persist the new user turn immediately so it survives a refresh.
-        const { error: insertUserErr } = await supabase.from("ai_core_messages").insert({
-          user_id: userId,
-          role: "user",
-          parts:
-            newMessage.parts as unknown as Database["public"]["Tables"]["ai_core_messages"]["Insert"]["parts"],
-        });
-        if (insertUserErr) {
-          return new Response(`Failed to save user message: ${insertUserErr.message}`, {
-            status: 500,
+        // ── Load conversation history ────────────────────────────────────────
+        let priorMessages: UIMessage[] = [];
+
+        if (conversationId) {
+          const { data: history } = await supabase
+            .from("ai_messages")
+            .select("id, role, parts")
+            .eq("conversation_id", conversationId)
+            .order("created_at", { ascending: true });
+
+          priorMessages = (history ?? []).map((row) => ({
+            id: row.id,
+            role: row.role as UIMessage["role"],
+            parts: (row.parts as UIMessage["parts"]) ?? [],
+          }));
+
+          // Persist new user message
+          await supabase.from("ai_messages").insert({
+            conversation_id: conversationId,
+            role: "user",
+            parts: sanitizedMessage.parts as unknown as Database["public"]["Tables"]["ai_messages"]["Insert"]["parts"],
+          });
+
+          // Update conversation updated_at
+          void supabase
+            .from("ai_conversations")
+            .update({ updated_at: new Date().toISOString() })
+            .eq("id", conversationId);
+        } else {
+          // Legacy path — use ai_core_messages
+          const { data: history } = await supabase
+            .from("ai_core_messages")
+            .select("id, role, parts")
+            .order("created_at", { ascending: true });
+
+          priorMessages = (history ?? []).map((row) => ({
+            id: row.id,
+            role: row.role as UIMessage["role"],
+            parts: (row.parts as UIMessage["parts"]) ?? [],
+          }));
+
+          await supabase.from("ai_core_messages").insert({
+            user_id: userId,
+            role: "user",
+            parts: sanitizedMessage.parts as unknown as Database["public"]["Tables"]["ai_core_messages"]["Insert"]["parts"],
           });
         }
 
-        const allMessages: UIMessage[] = [...priorMessages, newMessage];
+        const allMessages: UIMessage[] = [...priorMessages, sanitizedMessage];
 
-        const gateway = createLovableAiGatewayProvider(apiKey);
+        // ── Stream ──────────────────────────────────────────────────────────
+        const llm = getModel(provider, model);
         const result = streamText({
-          model: gateway("google/gemini-2.5-flash"),
-          system: SYSTEM_PROMPT,
+          model: llm,
+          system: systemPrompt,
           messages: await convertToModelMessages(allMessages),
+          maxTokens: 4096,
+          onError: ({ error }) => {
+            console.error("[Chat] streamText error:", error);
+          },
         });
 
         return result.toUIMessageStreamResponse({
           originalMessages: allMessages,
-          onFinish: async ({ responseMessage }) => {
+          onFinish: async ({ responseMessage, usage }) => {
             if (!responseMessage) return;
-            await supabase.from("ai_core_messages").insert({
+
+            const tokensIn = usage?.promptTokens ?? 0;
+            const tokensOut = usage?.completionTokens ?? 0;
+
+            if (conversationId) {
+              await supabase.from("ai_messages").insert({
+                conversation_id: conversationId,
+                role: "assistant",
+                parts: responseMessage.parts as unknown as Database["public"]["Tables"]["ai_messages"]["Insert"]["parts"],
+                tokens_used: tokensOut,
+              });
+            } else {
+              await supabase.from("ai_core_messages").insert({
+                user_id: userId,
+                role: "assistant",
+                parts: responseMessage.parts as unknown as Database["public"]["Tables"]["ai_core_messages"]["Insert"]["parts"],
+              });
+            }
+
+            // Increment rate limit with actual token counts
+            void incrementRateLimit(supabase, userId, tokensIn + tokensOut);
+
+            // Log the interaction
+            void logAiEvent(supabase, {
               user_id: userId,
-              role: "assistant",
-              parts:
-                responseMessage.parts as unknown as Database["public"]["Tables"]["ai_core_messages"]["Insert"]["parts"],
+              conversation_id: conversationId,
+              event_type: "chat",
+              provider,
+              model,
+              tokens_in: tokensIn,
+              tokens_out: tokensOut,
+              latency_ms: elapsed(),
             });
           },
         });
