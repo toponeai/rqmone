@@ -37,11 +37,7 @@ export function Starfield3D({ count = 3000 }: { count?: number }) {
           args={[positions, 3]}
           count={positions.length / 3}
         />
-        <bufferAttribute
-          attach="attributes-size"
-          args={[sizes, 1]}
-          count={sizes.length}
-        />
+        <bufferAttribute attach="attributes-size" args={[sizes, 1]} count={sizes.length} />
       </bufferGeometry>
       <pointsMaterial
         size={0.35}

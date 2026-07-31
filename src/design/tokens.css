@@ -7,17 +7,17 @@
 
 :root {
   /* ---- RQM brand palette ---- */
-  --rqm-primary: oklch(0.82 0.16 205);       /* aurora cyan */
+  --rqm-primary: oklch(0.82 0.16 205); /* aurora cyan */
   --rqm-primary-strong: oklch(0.72 0.19 205);
-  --rqm-secondary: oklch(0.68 0.19 285);     /* violet */
-  --rqm-accent: oklch(0.85 0.19 155);        /* mint aurora */
+  --rqm-secondary: oklch(0.68 0.19 285); /* violet */
+  --rqm-accent: oklch(0.85 0.19 155); /* mint aurora */
   --rqm-warning: oklch(0.83 0.17 85);
   --rqm-danger: oklch(0.64 0.24 25);
   --rqm-success: oklch(0.78 0.17 155);
 
   /* ---- Surfaces ---- */
   --rqm-bg: oklch(0.15 0.03 264);
-  --rqm-panel: oklch(0.20 0.035 264);
+  --rqm-panel: oklch(0.2 0.035 264);
   --rqm-panel-strong: oklch(0.24 0.035 264);
   --rqm-border: color-mix(in oklch, white 10%, transparent);
   --rqm-border-strong: color-mix(in oklch, white 18%, transparent);
@@ -102,8 +102,16 @@
 /* Aurora surface (subtle animated gradient for docks/panels). */
 @utility rqm-aurora {
   background:
-    radial-gradient(ellipse at 20% 0%, color-mix(in oklch, var(--rqm-primary) 18%, transparent), transparent 60%),
-    radial-gradient(ellipse at 80% 100%, color-mix(in oklch, var(--rqm-secondary) 16%, transparent), transparent 60%);
+    radial-gradient(
+      ellipse at 20% 0%,
+      color-mix(in oklch, var(--rqm-primary) 18%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse at 80% 100%,
+      color-mix(in oklch, var(--rqm-secondary) 16%, transparent),
+      transparent 60%
+    );
 }
 
 /* Focus ring using ring token. */

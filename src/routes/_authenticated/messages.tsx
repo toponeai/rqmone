@@ -45,8 +45,7 @@ function MessagesPage() {
   const conversations = conversationsQuery.data ?? [];
   const active = activeId ? conversations.find((c) => c.id === activeId) : undefined;
 
-  const setActive = (id: string | undefined) =>
-    navigate({ to: "/messages", search: { c: id } });
+  const setActive = (id: string | undefined) => navigate({ to: "/messages", search: { c: id } });
 
   return (
     <div className="fixed inset-0 top-14 bottom-16 md:bottom-0 flex bg-background">
@@ -115,7 +114,14 @@ function ConversationList({
           <Users className="w-4 h-4 mr-1" /> {t("messages.new")}
         </Button>
       </div>
-      {showNew && <NewConversationPicker onStarted={(id) => { onStarted(id); setShowNew(false); }} />}
+      {showNew && (
+        <NewConversationPicker
+          onStarted={(id) => {
+            onStarted(id);
+            setShowNew(false);
+          }}
+        />
+      )}
       <ScrollArea className="flex-1">
         {loading ? (
           <div className="p-6 grid place-items-center text-muted-foreground">
@@ -153,7 +159,8 @@ function ConversationList({
                       </div>
                       <p className="text-xs text-muted-foreground truncate">
                         {c.lastMessage
-                          ? (c.lastMessage.senderId === currentUserId ? "You: " : "") + c.lastMessage.body
+                          ? (c.lastMessage.senderId === currentUserId ? "You: " : "") +
+                            c.lastMessage.body
                           : t("messages.noMessages")}
                       </p>
                     </div>
@@ -274,10 +281,17 @@ function ChatPane({
             <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           </div>
         ) : items.length === 0 ? (
-          <p className="text-center text-xs text-muted-foreground py-8">{t("messages.startPrompt")}</p>
+          <p className="text-center text-xs text-muted-foreground py-8">
+            {t("messages.startPrompt")}
+          </p>
         ) : (
           items.map((m) => (
-            <MessageBubble key={m.id} mine={m.sender_id === currentUserId} body={m.body} createdAt={m.created_at} />
+            <MessageBubble
+              key={m.id}
+              mine={m.sender_id === currentUserId}
+              body={m.body}
+              createdAt={m.created_at}
+            />
           ))
         )}
       </div>
@@ -304,14 +318,26 @@ function ChatPane({
           aria-label={t("messages.inputPlaceholder")}
         />
         <Button type="submit" size="icon" disabled={!draft.trim() || send.isPending}>
-          {send.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+          {send.isPending ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Send className="w-4 h-4" />
+          )}
         </Button>
       </form>
     </>
   );
 }
 
-function MessageBubble({ mine, body, createdAt }: { mine: boolean; body: string; createdAt: string }) {
+function MessageBubble({
+  mine,
+  body,
+  createdAt,
+}: {
+  mine: boolean;
+  body: string;
+  createdAt: string;
+}) {
   return (
     <div className={cn("flex", mine ? "justify-end" : "justify-start")}>
       <div

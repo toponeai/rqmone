@@ -22,7 +22,11 @@ import {
 } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { supabase } from "@/integrations/supabase/client";
-import { loadAiCoreHistory, clearAiCoreHistory, type StoredAiMessage } from "@/lib/ai-core.functions";
+import {
+  loadAiCoreHistory,
+  clearAiCoreHistory,
+  type StoredAiMessage,
+} from "@/lib/ai-core.functions";
 
 export const Route = createFileRoute("/_authenticated/ai-core")({
   head: () => ({
@@ -30,7 +34,8 @@ export const Route = createFileRoute("/_authenticated/ai-core")({
       { title: "AI Core — R.Q.M.1" },
       {
         name: "description",
-        content: "The AI Core is the intelligent command surface of R.Q.M.1 — chat with the mind of your Interactive Earth.",
+        content:
+          "The AI Core is the intelligent command surface of R.Q.M.1 — chat with the mind of your Interactive Earth.",
       },
     ],
   }),

@@ -34,7 +34,7 @@ const clusterSchema = viewportSchema.extend({
 });
 
 export const getEntityClusters = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) => clusterSchema.parse(input))
+  .validator((input: unknown) => clusterSchema.parse(input))
   .handler(async ({ data }): Promise<EntityCluster[]> => {
     const supabase = publicClient();
     const { data: rows, error } = await supabase.rpc("entities_cluster", {
@@ -62,7 +62,7 @@ export const getEntityClusters = createServerFn({ method: "GET" })
   });
 
 export const getEntitiesInViewport = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) => viewportSchema.parse(input))
+  .validator((input: unknown) => viewportSchema.parse(input))
   .handler(async ({ data }): Promise<EntityPoint[]> => {
     const supabase = publicClient();
     const { data: rows, error } = await supabase.rpc("entities_in_viewport", {
@@ -93,7 +93,7 @@ const searchSchema = z.object({
 });
 
 export const searchEntities = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) => searchSchema.parse(input))
+  .validator((input: unknown) => searchSchema.parse(input))
   .handler(async ({ data }): Promise<EntitySearchResult[]> => {
     const supabase = publicClient();
     const { data: rows, error } = await supabase.rpc("search_entities", {
@@ -116,7 +116,7 @@ export const searchEntities = createServerFn({ method: "GET" })
   });
 
 export const getEntityById = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .validator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data }): Promise<EntityDetail | null> => {
     const supabase = publicClient();
     const { data: rows, error } = await supabase.rpc("get_entity", {
@@ -151,7 +151,7 @@ const createSchema = z.object({
 
 export const createEntity = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => createSchema.parse(input))
+  .validator((input: unknown) => createSchema.parse(input))
   .handler(async ({ data, context }): Promise<{ id: string }> => {
     const { data: newId, error } = await context.supabase.rpc("create_entity", {
       p_type: data.type,
@@ -202,7 +202,7 @@ const updateSchema = z.object({
 
 export const updateEntity = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => updateSchema.parse(input))
+  .validator((input: unknown) => updateSchema.parse(input))
   .handler(async ({ data, context }): Promise<{ id: string }> => {
     const { data: updatedId, error } = await context.supabase.rpc("update_entity", {
       p_id: data.id,
@@ -222,7 +222,7 @@ export const updateEntity = createServerFn({ method: "POST" })
 
 export const deleteEntity = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .validator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }): Promise<{ ok: boolean }> => {
     const { data: ok, error } = await context.supabase.rpc("delete_entity", {
       p_id: data.id,

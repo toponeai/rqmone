@@ -25,8 +25,7 @@ type OAuthApi = {
     id: string,
   ) => Promise<{ data: AuthorizationDetails | null; error: Error | null }>;
 };
-const oauthApi = (): OAuthApi =>
-  (supabase.auth as unknown as { oauth: OAuthApi }).oauth;
+const oauthApi = (): OAuthApi => (supabase.auth as unknown as { oauth: OAuthApi }).oauth;
 
 export const Route = createFileRoute("/.lovable/oauth/consent")({
   ssr: false,
@@ -153,11 +152,7 @@ function Consent() {
       )}
 
       <div className="mt-6 flex gap-3">
-        <Button
-          className="flex-1"
-          disabled={busy !== null}
-          onClick={() => void decide(true)}
-        >
+        <Button className="flex-1" disabled={busy !== null} onClick={() => void decide(true)}>
           {busy === "approve" && <Loader2 className="h-4 w-4 animate-spin" />}
           Approve
         </Button>

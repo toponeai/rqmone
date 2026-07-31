@@ -29,13 +29,7 @@ import {
 
 export type PlanetStatus = "ready" | "soon";
 
-export type GalaxyId =
-  | "core"
-  | "comms"
-  | "market"
-  | "economy"
-  | "analytics"
-  | "admin";
+export type GalaxyId = "core" | "comms" | "market" | "economy" | "analytics" | "admin";
 
 export interface Planet {
   id: string;
@@ -60,24 +54,159 @@ export const GALAXIES: { id: GalaxyId; labelKey: string }[] = [
 
 export const PLANETS: Planet[] = [
   // Core
-  { id: "earth", labelKey: "module.earth", icon: EarthIcon, color: "#4fb3ff", size: 44, status: "ready", route: "/", galaxy: "core" },
-  { id: "ai", labelKey: "module.ai", icon: AIIcon, color: "#c084fc", size: 40, status: "ready", route: "/ai-core", galaxy: "core" },
-  { id: "manage", labelKey: "module.manage", icon: LayersIcon, color: "#22d3ee", size: 38, status: "ready", route: "/manage", galaxy: "core" },
+  {
+    id: "earth",
+    labelKey: "module.earth",
+    icon: EarthIcon,
+    color: "#4fb3ff",
+    size: 44,
+    status: "ready",
+    route: "/",
+    galaxy: "core",
+  },
+  {
+    id: "ai",
+    labelKey: "module.ai",
+    icon: AIIcon,
+    color: "#c084fc",
+    size: 40,
+    status: "ready",
+    route: "/ai-core",
+    galaxy: "core",
+  },
+  {
+    id: "manage",
+    labelKey: "module.manage",
+    icon: LayersIcon,
+    color: "#22d3ee",
+    size: 38,
+    status: "ready",
+    route: "/manage",
+    galaxy: "core",
+  },
   // Comms
-  { id: "messages", labelKey: "module.messages", icon: MessagesIcon, color: "#34d399", size: 38, status: "ready", route: "/messages", galaxy: "comms" },
-  { id: "notifications", labelKey: "nav.notifications", icon: BellIcon, color: "#fb923c", size: 34, status: "soon", soonKey: "module.soon.body", galaxy: "comms" },
+  {
+    id: "messages",
+    labelKey: "module.messages",
+    icon: MessagesIcon,
+    color: "#34d399",
+    size: 38,
+    status: "ready",
+    route: "/messages",
+    galaxy: "comms",
+  },
+  {
+    id: "notifications",
+    labelKey: "nav.notifications",
+    icon: BellIcon,
+    color: "#fb923c",
+    size: 34,
+    status: "soon",
+    soonKey: "module.soon.body",
+    galaxy: "comms",
+  },
   // Marketplace
-  { id: "marketplace", labelKey: "module.marketplace", icon: MarketplaceIcon, color: "#f472b6", size: 42, status: "soon", soonKey: "module.marketplace.soon", galaxy: "market" },
-  { id: "business", labelKey: "module.community", icon: BusinessIcon, color: "#a3e635", size: 36, status: "soon", soonKey: "module.community.soon", galaxy: "market" },
-  { id: "jobs", labelKey: "nav.jobs" as never, icon: JobsIcon, color: "#60a5fa", size: 36, status: "soon", soonKey: "module.soon.body", galaxy: "market" },
+  {
+    id: "marketplace",
+    labelKey: "module.marketplace",
+    icon: MarketplaceIcon,
+    color: "#f472b6",
+    size: 42,
+    status: "soon",
+    soonKey: "module.marketplace.soon",
+    galaxy: "market",
+  },
+  {
+    id: "business",
+    labelKey: "module.community",
+    icon: BusinessIcon,
+    color: "#a3e635",
+    size: 36,
+    status: "soon",
+    soonKey: "module.community.soon",
+    galaxy: "market",
+  },
+  {
+    id: "jobs",
+    labelKey: "nav.jobs" as never,
+    icon: JobsIcon,
+    color: "#60a5fa",
+    size: 36,
+    status: "soon",
+    soonKey: "module.soon.body",
+    galaxy: "market",
+  },
   // Economy
-  { id: "wallet", labelKey: "module.wallet", icon: WalletIcon, color: "#fbbf24", size: 40, status: "soon", soonKey: "module.wallet.soon", galaxy: "economy" },
+  {
+    id: "wallet",
+    labelKey: "module.wallet",
+    icon: WalletIcon,
+    color: "#fbbf24",
+    size: 40,
+    status: "soon",
+    soonKey: "module.wallet.soon",
+    galaxy: "economy",
+  },
   // Analytics
-  { id: "analytics", labelKey: "nav.analytics", icon: AnalyticsIcon, color: "#38bdf8", size: 36, status: "soon", soonKey: "module.soon.body", galaxy: "analytics" },
-  { id: "live", labelKey: "module.live", icon: LiveIcon, color: "#fb7185", size: 36, status: "soon", soonKey: "module.live.soon", galaxy: "analytics" },
-  { id: "community", labelKey: "module.community", icon: PeopleIcon, color: "#a3e635", size: 34, status: "soon", soonKey: "module.community.soon", galaxy: "analytics" },
+  {
+    id: "analytics",
+    labelKey: "nav.analytics",
+    icon: AnalyticsIcon,
+    color: "#38bdf8",
+    size: 36,
+    status: "soon",
+    soonKey: "module.soon.body",
+    galaxy: "analytics",
+  },
+  {
+    id: "live",
+    labelKey: "module.live",
+    icon: LiveIcon,
+    color: "#fb7185",
+    size: 36,
+    status: "soon",
+    soonKey: "module.live.soon",
+    galaxy: "analytics",
+  },
+  {
+    id: "community",
+    labelKey: "module.community",
+    icon: PeopleIcon,
+    color: "#a3e635",
+    size: 34,
+    status: "soon",
+    soonKey: "module.community.soon",
+    galaxy: "analytics",
+  },
   // Admin
-  { id: "profile", labelKey: "nav.profile", icon: UserIcon, color: "#e2e8f0", size: 34, status: "soon", soonKey: "module.soon.body", galaxy: "admin" },
-  { id: "settings", labelKey: "nav.settings", icon: SettingsIcon, color: "#94a3b8", size: 34, status: "soon", soonKey: "module.soon.body", galaxy: "admin" },
-  { id: "admin", labelKey: "nav.admin", icon: AdminIcon, color: "#f43f5e", size: 34, status: "soon", soonKey: "module.soon.body", galaxy: "admin" },
+  {
+    id: "profile",
+    labelKey: "nav.profile",
+    icon: UserIcon,
+    color: "#e2e8f0",
+    size: 34,
+    status: "soon",
+    soonKey: "module.soon.body",
+    galaxy: "admin",
+  },
+  {
+    id: "settings",
+    labelKey: "nav.settings",
+    icon: SettingsIcon,
+    color: "#94a3b8",
+    size: 34,
+    status: "soon",
+    soonKey: "module.soon.body",
+    galaxy: "admin",
+  },
+  {
+    id: "admin",
+    labelKey: "nav.admin",
+    icon: AdminIcon,
+    color: "#f43f5e",
+    size: 34,
+    status: "soon",
+    soonKey: "module.soon.body",
+    galaxy: "admin",
+  },
 ];

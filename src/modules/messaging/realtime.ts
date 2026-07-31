@@ -14,7 +14,12 @@ export function useMessagesRealtime(conversationId: string | null) {
       .channel(`messages:${conversationId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "messages", filter: `conversation_id=eq.${conversationId}` },
+        {
+          event: "*",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
         () => {
           qc.invalidateQueries({ queryKey: ["messages", conversationId] });
           qc.invalidateQueries({ queryKey: ["conversations"] });
@@ -33,15 +38,11 @@ export function useConversationsRealtime(userId: string | null) {
     if (!userId) return;
     const channel = supabase
       .channel(`conversations:${userId}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "conversations" },
-        () => qc.invalidateQueries({ queryKey: ["conversations"] }),
+      .on("postgres_changes", { event: "*", schema: "public", table: "conversations" }, () =>
+        qc.invalidateQueries({ queryKey: ["conversations"] }),
       )
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages" },
-        () => qc.invalidateQueries({ queryKey: ["conversations"] }),
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, () =>
+        qc.invalidateQueries({ queryKey: ["conversations"] }),
       )
       .subscribe();
     return () => {

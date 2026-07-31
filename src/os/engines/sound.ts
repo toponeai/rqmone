@@ -70,7 +70,6 @@ const CUES: Record<SoundName, Tone> = {
   "pin-hover": { freq: 1040, dur: 0.05, type: "sine", gain: 0.025 },
 };
 
-
 export function isSoundEnabled(): boolean {
   return enabled;
 }

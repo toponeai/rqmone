@@ -18,8 +18,7 @@ export const useCreateStore = create<CreateStore>((set) => ({
   picking: false,
   pickedCoords: null,
   desiredType: null,
-  openDialog: (type = null) =>
-    set({ dialogOpen: true, desiredType: type, pickedCoords: null }),
+  openDialog: (type = null) => set({ dialogOpen: true, desiredType: type, pickedCoords: null }),
   closeDialog: () => set({ dialogOpen: false, picking: false }),
   requestPick: () => set({ dialogOpen: false, picking: true }),
   setPickedCoords: (c) => set({ pickedCoords: c, picking: false, dialogOpen: !!c }),

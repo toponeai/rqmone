@@ -60,7 +60,9 @@ export function LeftDock() {
         const label = t(it.label as never) ?? it.id;
         const cls = cn(
           "group relative flex h-10 w-10 items-center justify-center rounded-xl transition",
-          active ? "bg-[var(--rqm-primary)]/20 text-[var(--rqm-primary)]" : "text-white/70 hover:bg-white/10 hover:text-white",
+          active
+            ? "bg-[var(--rqm-primary)]/20 text-[var(--rqm-primary)]"
+            : "text-white/70 hover:bg-white/10 hover:text-white",
           it.disabled && "opacity-40 cursor-not-allowed",
         );
         const inner = (

@@ -4,7 +4,6 @@ import type { Planet } from "./planets";
 
 type TKey = keyof typeof en;
 
-
 /**
  * Placeholder window content for planets not yet shipped. Keeps the OS
  * navigable while individual modules land in later stages.

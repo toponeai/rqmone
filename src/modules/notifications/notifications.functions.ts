@@ -21,7 +21,7 @@ export interface AppNotificationRow {
 /** List the user's most recent notifications (unarchived by default). */
 export const listNotifications = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z
       .object({
         limit: z.number().int().min(1).max(100).default(30),
@@ -61,7 +61,7 @@ export const unreadNotificationsCount = createServerFn({ method: "GET" })
 
 export const markNotificationRead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: uuid }).parse(input))
+  .validator((input: unknown) => z.object({ id: uuid }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { error } = await supabase
@@ -88,7 +88,7 @@ export const markAllNotificationsRead = createServerFn({ method: "POST" })
 
 export const archiveNotification = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: uuid }).parse(input))
+  .validator((input: unknown) => z.object({ id: uuid }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { error } = await supabase

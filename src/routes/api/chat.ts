@@ -27,9 +27,7 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         const authHeader = request.headers.get("authorization") ?? "";
-        const token = authHeader.startsWith("Bearer ")
-          ? authHeader.slice("Bearer ".length)
-          : null;
+        const token = authHeader.startsWith("Bearer ") ? authHeader.slice("Bearer ".length) : null;
         if (!token) return new Response("Unauthorized", { status: 401 });
 
         // Client scoped to the caller — RLS applies as that user.
@@ -38,7 +36,10 @@ export const Route = createFileRoute("/api/chat")({
           global: {
             fetch: (input, init) => {
               const h = new Headers(init?.headers);
-              if (supabaseKey.startsWith("sb_") && h.get("Authorization") === `Bearer ${supabaseKey}`) {
+              if (
+                supabaseKey.startsWith("sb_") &&
+                h.get("Authorization") === `Bearer ${supabaseKey}`
+              ) {
                 h.delete("Authorization");
               }
               h.set("apikey", supabaseKey);
@@ -84,7 +85,8 @@ export const Route = createFileRoute("/api/chat")({
         const { error: insertUserErr } = await supabase.from("ai_core_messages").insert({
           user_id: userId,
           role: "user",
-          parts: newMessage.parts as unknown as Database["public"]["Tables"]["ai_core_messages"]["Insert"]["parts"],
+          parts:
+            newMessage.parts as unknown as Database["public"]["Tables"]["ai_core_messages"]["Insert"]["parts"],
         });
         if (insertUserErr) {
           return new Response(`Failed to save user message: ${insertUserErr.message}`, {
@@ -108,7 +110,8 @@ export const Route = createFileRoute("/api/chat")({
             await supabase.from("ai_core_messages").insert({
               user_id: userId,
               role: "assistant",
-              parts: responseMessage.parts as unknown as Database["public"]["Tables"]["ai_core_messages"]["Insert"]["parts"],
+              parts:
+                responseMessage.parts as unknown as Database["public"]["Tables"]["ai_core_messages"]["Insert"]["parts"],
             });
           },
         });

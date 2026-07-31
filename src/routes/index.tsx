@@ -147,7 +147,8 @@ function GalaxyView({ onEnterEarth }: { onEnterEarth: () => void }) {
           R.Q.M.1 · GALAXY
         </h1>
         <p className="max-w-md text-xs text-white/60">
-          {t("galaxy.core")} — click a planet to open a module. Fly to Earth to browse the marketplace.
+          {t("galaxy.core")} — click a planet to open a module. Fly to Earth to browse the
+          marketplace.
         </p>
       </div>
 

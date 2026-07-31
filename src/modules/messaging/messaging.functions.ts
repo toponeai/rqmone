@@ -50,7 +50,14 @@ export const listConversations = createServerFn({ method: "GET" })
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(200);
-    type RecentMsg = { id: string; conversation_id: string; body: string; sender_id: string; created_at: string; deleted_at: string | null };
+    type RecentMsg = {
+      id: string;
+      conversation_id: string;
+      body: string;
+      sender_id: string;
+      created_at: string;
+      deleted_at: string | null;
+    };
     const lastByConv = new Map<string, RecentMsg>();
     for (const m of (recent ?? []) as RecentMsg[]) {
       if (!lastByConv.has(m.conversation_id)) lastByConv.set(m.conversation_id, m);
@@ -65,7 +72,11 @@ export const listConversations = createServerFn({ method: "GET" })
       const others = (allParts ?? [])
         .filter((p) => p.conversation_id === c.id && p.user_id !== userId)
         .map((p) => profMap.get(p.user_id))
-        .filter(Boolean) as { id: string; display_name: string | null; avatar_url: string | null }[];
+        .filter(Boolean) as {
+        id: string;
+        display_name: string | null;
+        avatar_url: string | null;
+      }[];
       const meta = partMap.get(c.id);
       const last = lastByConv.get(c.id);
       const unread =
@@ -75,7 +86,9 @@ export const listConversations = createServerFn({ method: "GET" })
         title: c.title,
         isGroup: c.is_group,
         lastMessageAt: c.last_message_at,
-        lastMessage: last ? { body: last.body, senderId: last.sender_id, createdAt: last.created_at } : null,
+        lastMessage: last
+          ? { body: last.body, senderId: last.sender_id, createdAt: last.created_at }
+          : null,
         counterparts: others,
         muted: meta?.muted ?? false,
         unread,
@@ -85,8 +98,10 @@ export const listConversations = createServerFn({ method: "GET" })
 
 export const getMessages = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ conversationId: uuid, limit: z.number().int().min(1).max(200).default(80) }).parse(input),
+  .validator((input: unknown) =>
+    z
+      .object({ conversationId: uuid, limit: z.number().int().min(1).max(200).default(80) })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
@@ -107,7 +122,7 @@ const sendSchema = z.object({
 
 export const sendMessage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => sendSchema.parse(input))
+  .validator((input: unknown) => sendSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
@@ -144,7 +159,7 @@ const createSchema = z.object({
 
 export const createOrGetConversation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => createSchema.parse(input))
+  .validator((input: unknown) => createSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
@@ -190,7 +205,7 @@ export const createOrGetConversation = createServerFn({ method: "POST" })
 
 export const markConversationRead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ conversationId: uuid }).parse(input))
+  .validator((input: unknown) => z.object({ conversationId: uuid }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { error } = await supabase
@@ -205,9 +220,7 @@ export const markConversationRead = createServerFn({ method: "POST" })
 /** Universal-search participant lookup for starting new DMs. */
 export const searchUsers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ q: z.string().trim().min(1).max(80) }).parse(input),
-  )
+  .validator((input: unknown) => z.object({ q: z.string().trim().min(1).max(80) }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: rows, error } = await supabase

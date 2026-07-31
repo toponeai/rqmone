@@ -54,7 +54,13 @@ export function BottomNav() {
     >
       {item({ key: "home", to: "/", icon: EarthIcon, label: t("nav.home") })}
       {item({ key: "search", onClick: focusSearch, icon: SearchIcon, label: t("nav.search") })}
-      {item({ key: "add", onClick: () => openDialog(null), icon: PlusIcon, label: t("action.add"), accent: true })}
+      {item({
+        key: "add",
+        onClick: () => openDialog(null),
+        icon: PlusIcon,
+        label: t("action.add"),
+        accent: true,
+      })}
       {item({ key: "ai", to: "/ai-core", icon: AIIcon, label: t("nav.ai") })}
       {item({ key: "manage", to: "/manage", icon: LayersIcon, label: t("nav.manage") })}
     </nav>

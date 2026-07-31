@@ -76,12 +76,7 @@ export function GalaxyScene({ onPlanetClick }: GalaxySceneProps) {
 
         {/* Planets */}
         {planets.map((p) => (
-          <Planet3D
-            key={p.id}
-            planet={p}
-            label={t(p.labelKey as TKey)}
-            onClick={handleClick}
-          />
+          <Planet3D key={p.id} planet={p} label={t(p.labelKey as TKey)} onClick={handleClick} />
         ))}
       </Suspense>
 

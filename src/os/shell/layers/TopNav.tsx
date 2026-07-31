@@ -4,13 +4,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AuthMenu } from "@/components/auth-menu";
-import {
-  AIIcon,
-  CommandIcon,
-  EarthIcon,
-  LanguageIcon,
-  SearchIcon,
-} from "@/os/icons";
+import { AIIcon, CommandIcon, EarthIcon, LanguageIcon, SearchIcon } from "@/os/icons";
 import { useT, useLocaleStore } from "@/os/i18n";
 import { useCommandStore } from "@/os/stores/command.store";
 import { useSearchStore, registerSearchFocusHandler } from "@/os/stores/search.store";

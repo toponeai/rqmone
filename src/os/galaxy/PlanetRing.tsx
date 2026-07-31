@@ -10,7 +10,6 @@ import { ComingSoonModule } from "./ComingSoonModule";
 
 type TKey = keyof typeof en;
 
-
 /**
  * Galaxy Planet Ring — orbital overlay showing every top-level module as a
  * clickable planet around the Earth. Presentation-only shell wiring: ready

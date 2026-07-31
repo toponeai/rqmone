@@ -50,10 +50,7 @@ export function Starfield({ density = 160, nebula = true, className }: Starfield
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const count = Math.min(
-        density,
-        Math.max(40, Math.floor((w * h) / 8000)),
-      );
+      const count = Math.min(density, Math.max(40, Math.floor((w * h) / 8000)));
       stars = Array.from({ length: count }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,
@@ -69,12 +66,26 @@ export function Starfield({ density = 160, nebula = true, className }: Starfield
       if (!running) return;
       ctx.clearRect(0, 0, w, h);
       if (nebula) {
-        const g1 = ctx.createRadialGradient(w * 0.2, h * 0.3, 0, w * 0.2, h * 0.3, Math.max(w, h) * 0.6);
+        const g1 = ctx.createRadialGradient(
+          w * 0.2,
+          h * 0.3,
+          0,
+          w * 0.2,
+          h * 0.3,
+          Math.max(w, h) * 0.6,
+        );
         g1.addColorStop(0, "rgba(80,140,255,0.10)");
         g1.addColorStop(1, "rgba(80,140,255,0)");
         ctx.fillStyle = g1;
         ctx.fillRect(0, 0, w, h);
-        const g2 = ctx.createRadialGradient(w * 0.85, h * 0.75, 0, w * 0.85, h * 0.75, Math.max(w, h) * 0.55);
+        const g2 = ctx.createRadialGradient(
+          w * 0.85,
+          h * 0.75,
+          0,
+          w * 0.85,
+          h * 0.75,
+          Math.max(w, h) * 0.55,
+        );
         g2.addColorStop(0, "rgba(180,90,255,0.09)");
         g2.addColorStop(1, "rgba(180,90,255,0)");
         ctx.fillStyle = g2;
@@ -118,7 +129,11 @@ export function Starfield({ density = 160, nebula = true, className }: Starfield
   }, [density, nebula]);
 
   return (
-    <div className={className} aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+    <div
+      className={className}
+      aria-hidden="true"
+      style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
+    >
       <canvas ref={canvasRef} style={{ width: "100%", height: "100%", display: "block" }} />
     </div>
   );

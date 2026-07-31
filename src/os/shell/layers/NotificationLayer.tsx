@@ -94,9 +94,7 @@ export function NotificationLayer() {
             <LoaderIcon className="h-4 w-4 animate-spin" />
           </li>
         ) : items.length === 0 ? (
-          <li className="p-6 text-center text-sm text-white/50">
-            {t("notifications.empty")}
-          </li>
+          <li className="p-6 text-center text-sm text-white/50">{t("notifications.empty")}</li>
         ) : (
           items.map((n) => {
             const unread = !n.read_at;
@@ -113,9 +111,7 @@ export function NotificationLayer() {
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium">{n.title}</div>
                   {n.body ? (
-                    <div className="line-clamp-2 text-xs text-white/60">
-                      {n.body}
-                    </div>
+                    <div className="line-clamp-2 text-xs text-white/60">{n.body}</div>
                   ) : null}
                   <div className="mt-0.5 text-[10px] uppercase tracking-wide text-white/40">
                     {formatDistanceToNow(new Date(n.created_at), {

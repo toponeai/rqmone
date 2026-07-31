@@ -1,10 +1,4 @@
-import {
-  BusinessIcon,
-  EventIcon,
-  PlusIcon,
-  ProductIcon,
-  PropertyIcon,
-} from "@/os/icons";
+import { BusinessIcon, EventIcon, PlusIcon, ProductIcon, PropertyIcon } from "@/os/icons";
 import {
   DropdownMenu,
   DropdownMenuContent,

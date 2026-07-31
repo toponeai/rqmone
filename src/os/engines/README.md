@@ -3,12 +3,12 @@
 Reusable primitives that power the Galaxy Operating System. Every module
 consumes these — no duplicated animations, sounds, particles, or themes.
 
-| Engine       | File            | Purpose                                                     |
-| ------------ | --------------- | ----------------------------------------------------------- |
-| Motion       | `motion.ts`     | Named durations, easings, keyframe presets (`anim("fade")`) |
-| Particles    | `particles.tsx` | Reusable `<Starfield />` canvas layer (stars + nebula)      |
-| Sound        | `sound.ts`      | WebAudio cues (`play("window-open")`), opt-in + persisted   |
-| Theme        | `themes.ts`     | `applyTheme("aurora")`, registry-driven CSS variables       |
+| Engine    | File            | Purpose                                                     |
+| --------- | --------------- | ----------------------------------------------------------- |
+| Motion    | `motion.ts`     | Named durations, easings, keyframe presets (`anim("fade")`) |
+| Particles | `particles.tsx` | Reusable `<Starfield />` canvas layer (stars + nebula)      |
+| Sound     | `sound.ts`      | WebAudio cues (`play("window-open")`), opt-in + persisted   |
+| Theme     | `themes.ts`     | `applyTheme("aurora")`, registry-driven CSS variables       |
 
 ## Design contract
 

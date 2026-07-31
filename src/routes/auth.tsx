@@ -118,9 +118,7 @@ function GoogleButton({ redirectTo }: { redirectTo: string }) {
       // Preserve the intended return path (e.g. an OAuth consent URL) through
       // the Google round-trip by baking it into redirect_uri directly.
       const returnTo =
-        redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
-          ? redirectTo
-          : "/";
+        redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//") ? redirectTo : "/";
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: `${window.location.origin}${returnTo}`,
       });

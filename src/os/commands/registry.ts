@@ -1,13 +1,7 @@
 import type { ComponentType } from "react";
 import type { IconComponent } from "@/os/icons";
 
-export type CommandGroup =
-  | "search"
-  | "create"
-  | "navigate"
-  | "action"
-  | "ai"
-  | "system";
+export type CommandGroup = "search" | "create" | "navigate" | "action" | "ai" | "system";
 
 export interface CommandContext {
   navigate: (path: string) => void;
@@ -17,11 +11,11 @@ export interface CommandContext {
 
 export interface Command {
   id: string;
-  title: string;      // i18n key or literal fallback
+  title: string; // i18n key or literal fallback
   hint?: string;
   group: CommandGroup;
   icon?: IconComponent | ComponentType<{ className?: string }>;
-  keybinding?: string;      // e.g. "mod+k", "mod+shift+n"
+  keybinding?: string; // e.g. "mod+k", "mod+shift+n"
   when?: (ctx: CommandContext) => boolean;
   run: (ctx: CommandContext) => void | Promise<void>;
 }

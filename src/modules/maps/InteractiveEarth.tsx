@@ -189,7 +189,6 @@ export function InteractiveEarth({
             atmosphereColor="#6fd6ff"
             atmosphereAltitude={0.22}
             showGraticules={false}
-
             pointsData={points}
             pointLat={(d: object) => (d as EntityPoint).lat}
             pointLng={(d: object) => (d as EntityPoint).lng}

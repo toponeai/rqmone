@@ -124,9 +124,7 @@ export function Planet3D({ planet, onClick, label }: Planet3DProps) {
           >
             {label}
             {planet.status === "soon" ? (
-              <span style={{ marginInlineStart: 6, opacity: 0.7, fontSize: 9 }}>
-                • soon
-              </span>
+              <span style={{ marginInlineStart: 6, opacity: 0.7, fontSize: 9 }}>• soon</span>
             ) : null}
           </div>
         </Html>

@@ -15,6 +15,5 @@ export const useCommandStore = create<CommandStore>((set, get) => ({
   openPalette: () => set({ paletteOpen: true }),
   closePalette: () => set({ paletteOpen: false }),
   togglePalette: () => set({ paletteOpen: !get().paletteOpen }),
-  pushRecent: (id) =>
-    set({ recent: [id, ...get().recent.filter((r) => r !== id)].slice(0, 8) }),
+  pushRecent: (id) => set({ recent: [id, ...get().recent.filter((r) => r !== id)].slice(0, 8) }),
 }));

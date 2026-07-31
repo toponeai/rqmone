@@ -28,8 +28,7 @@ export const useNotificationStore = create<NotificationStore>((set) => ({
         ...s.items,
       ].slice(0, 50),
     })),
-  markAllRead: () =>
-    set((s) => ({ items: s.items.map((i) => ({ ...i, read: true })) })),
+  markAllRead: () => set((s) => ({ items: s.items.map((i) => ({ ...i, read: true })) })),
   togglePanel: () => set((s) => ({ panelOpen: !s.panelOpen })),
   setPanelOpen: (v) => set({ panelOpen: v }),
   clear: () => set({ items: [] }),

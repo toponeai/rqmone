@@ -96,9 +96,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "R.Q.M.1 — The Interactive Earth" },
-      { name: "twitter:description", content: "R.Q.M.1 is a living interactive Earth where every business, property, event and product is discoverable at its real location on the planet." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/b1bde0fd-b224-4ead-ae55-48117d964845" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/b1bde0fd-b224-4ead-ae55-48117d964845" },
+      {
+        name: "twitter:description",
+        content:
+          "R.Q.M.1 is a living interactive Earth where every business, property, event and product is discoverable at its real location on the planet.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/b1bde0fd-b224-4ead-ae55-48117d964845",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/b1bde0fd-b224-4ead-ae55-48117d964845",
+      },
     ],
     links: [
       {

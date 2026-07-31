@@ -37,9 +37,7 @@ export function CommandPaletteLayer() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return commands;
-    return commands.filter(
-      (c) => c.title.toLowerCase().includes(q) || c.id.includes(q),
-    );
+    return commands.filter((c) => c.title.toLowerCase().includes(q) || c.id.includes(q));
   }, [commands, query]);
 
   if (!open) return null;

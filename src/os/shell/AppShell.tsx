@@ -2,10 +2,7 @@ import { useEffect, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 
 import { useSession } from "@/hooks/use-session";
-import {
-  useHydrateLocaleFromStorage,
-  useSyncLocaleToDocument,
-} from "@/os/i18n";
+import { useHydrateLocaleFromStorage, useSyncLocaleToDocument } from "@/os/i18n";
 import { registerBuiltinCommands } from "@/os/commands/builtins";
 import { setCommandContextProvider } from "@/os/commands/bus";
 import { useBreakpoint } from "./responsive";
