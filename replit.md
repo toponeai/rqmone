@@ -59,6 +59,16 @@ public/
   textures/       Earth globe textures
 ```
 
+## Documentation
+
+| Document | Purpose |
+|---|---|
+| `ARCHITECTURE.md` | Module reference, folder structure, application and data flow |
+| `DEVELOPMENT_GUIDE.md` | Local dev, Replit, GitHub workflow, Vercel deployment, Supabase ops |
+| `ROADMAP.md` | Phased feature plan (Phase 1–8) |
+| `TODO.md` | Prioritised task list |
+| `PRODUCTION_READINESS_REPORT.md` | Build, dependency, Supabase, and security audit |
+
 ## User preferences
 
 - Do not change application logic when making infrastructure/tooling changes
