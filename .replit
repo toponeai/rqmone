@@ -33,3 +33,13 @@ outputType = "webview"
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[userenv]
+
+[userenv.shared]
+SUPABASE_PROJECT_ID = "fdiaohrvifpwhimhgxzk"
+SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ncFEoZKD5NWfyLZ20JKJ5Q_SUg6ZG5l"
+SUPABASE_URL = "https://fdiaohrvifpwhimhgxzk.supabase.co"
+VITE_SUPABASE_PROJECT_ID = "fdiaohrvifpwhimhgxzk"
+VITE_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ncFEoZKD5NWfyLZ20JKJ5Q_SUg6ZG5l"
+VITE_SUPABASE_URL = "https://fdiaohrvifpwhimhgxzk.supabase.co"
