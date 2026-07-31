@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EntityIdRouteImport } from './routes/entity.$id'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedManageRouteImport } from './routes/_authenticated/manage'
 import { Route as AuthenticatedAiCoreRouteImport } from './routes/_authenticated/ai-core'
@@ -52,6 +53,12 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
@@ -100,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/ai-core': typeof AuthenticatedAiCoreRoute
   '/manage': typeof AuthenticatedManageRoute
   '/messages': typeof AuthenticatedMessagesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/api/chat': typeof ApiChatRoute
   '/entity/$id': typeof EntityIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -114,6 +122,7 @@ export interface FileRoutesByTo {
   '/ai-core': typeof AuthenticatedAiCoreRoute
   '/manage': typeof AuthenticatedManageRoute
   '/messages': typeof AuthenticatedMessagesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/api/chat': typeof ApiChatRoute
   '/entity/$id': typeof EntityIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -130,6 +139,7 @@ export interface FileRoutesById {
   '/_authenticated/ai-core': typeof AuthenticatedAiCoreRoute
   '/_authenticated/manage': typeof AuthenticatedManageRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/api/chat': typeof ApiChatRoute
   '/entity/$id': typeof EntityIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
     | '/ai-core'
     | '/manage'
     | '/messages'
+    | '/notifications'
     | '/api/chat'
     | '/entity/$id'
     | '/.lovable/oauth/consent'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/ai-core'
     | '/manage'
     | '/messages'
+    | '/notifications'
     | '/api/chat'
     | '/entity/$id'
     | '/.lovable/oauth/consent'
@@ -175,6 +187,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ai-core'
     | '/_authenticated/manage'
     | '/_authenticated/messages'
+    | '/_authenticated/notifications'
     | '/api/chat'
     | '/entity/$id'
     | '/.lovable/oauth/consent'
@@ -238,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/messages': {
       id: '/_authenticated/messages'
       path: '/messages'
@@ -294,12 +314,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAiCoreRoute: typeof AuthenticatedAiCoreRoute
   AuthenticatedManageRoute: typeof AuthenticatedManageRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAiCoreRoute: AuthenticatedAiCoreRoute,
   AuthenticatedManageRoute: AuthenticatedManageRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

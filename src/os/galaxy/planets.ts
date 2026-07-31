@@ -101,8 +101,8 @@ export const PLANETS: Planet[] = [
     icon: BellIcon,
     color: "#fb923c",
     size: 34,
-    status: "soon",
-    soonKey: "module.soon.body",
+    status: "ready",
+    route: "/notifications",
     galaxy: "comms",
   },
   // Marketplace
