@@ -32,6 +32,346 @@ export type Database = {
         };
         Relationships: [];
       };
+      ai_agents: {
+        Row: {
+          created_at: string;
+          description: string;
+          id: string;
+          is_active: boolean;
+          metadata: Json;
+          model: string;
+          name: string;
+          provider: string;
+          system_prompt: string;
+          tools: string[];
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          description?: string;
+          id?: string;
+          is_active?: boolean;
+          metadata?: Json;
+          model?: string;
+          name: string;
+          provider?: string;
+          system_prompt: string;
+          tools?: string[];
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          description?: string;
+          id?: string;
+          is_active?: boolean;
+          metadata?: Json;
+          model?: string;
+          name?: string;
+          provider?: string;
+          system_prompt?: string;
+          tools?: string[];
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      ai_conversations: {
+        Row: {
+          agent_id: string | null;
+          created_at: string;
+          id: string;
+          metadata: Json;
+          model: string;
+          provider: string;
+          title: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          agent_id?: string | null;
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          model?: string;
+          provider?: string;
+          title?: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          agent_id?: string | null;
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          model?: string;
+          provider?: string;
+          title?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_conversations_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: false;
+            referencedRelation: "ai_agents";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      ai_logs: {
+        Row: {
+          conversation_id: string | null;
+          created_at: string;
+          error: string | null;
+          event_type: string;
+          id: string;
+          latency_ms: number | null;
+          metadata: Json;
+          model: string | null;
+          provider: string | null;
+          tokens_in: number | null;
+          tokens_out: number | null;
+          user_id: string;
+        };
+        Insert: {
+          conversation_id?: string | null;
+          created_at?: string;
+          error?: string | null;
+          event_type: string;
+          id?: string;
+          latency_ms?: number | null;
+          metadata?: Json;
+          model?: string | null;
+          provider?: string | null;
+          tokens_in?: number | null;
+          tokens_out?: number | null;
+          user_id: string;
+        };
+        Update: {
+          conversation_id?: string | null;
+          created_at?: string;
+          error?: string | null;
+          event_type?: string;
+          id?: string;
+          latency_ms?: number | null;
+          metadata?: Json;
+          model?: string | null;
+          provider?: string | null;
+          tokens_in?: number | null;
+          tokens_out?: number | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_logs_conversation_id_fkey";
+            columns: ["conversation_id"];
+            isOneToOne: false;
+            referencedRelation: "ai_conversations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      ai_messages: {
+        Row: {
+          conversation_id: string;
+          created_at: string;
+          id: string;
+          metadata: Json;
+          parts: Json;
+          role: string;
+          tokens_used: number | null;
+        };
+        Insert: {
+          conversation_id: string;
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          parts?: Json;
+          role: string;
+          tokens_used?: number | null;
+        };
+        Update: {
+          conversation_id?: string;
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          parts?: Json;
+          role?: string;
+          tokens_used?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_messages_conversation_id_fkey";
+            columns: ["conversation_id"];
+            isOneToOne: false;
+            referencedRelation: "ai_conversations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      ai_plan_tasks: {
+        Row: {
+          created_at: string;
+          description: string;
+          id: string;
+          metadata: Json;
+          plan_id: string;
+          result: Json | null;
+          sort_order: number;
+          status: string;
+          title: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          description?: string;
+          id?: string;
+          metadata?: Json;
+          plan_id: string;
+          result?: Json | null;
+          sort_order?: number;
+          status?: string;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          description?: string;
+          id?: string;
+          metadata?: Json;
+          plan_id?: string;
+          result?: Json | null;
+          sort_order?: number;
+          status?: string;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_plan_tasks_plan_id_fkey";
+            columns: ["plan_id"];
+            isOneToOne: false;
+            referencedRelation: "ai_plans";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      ai_plans: {
+        Row: {
+          conversation_id: string | null;
+          created_at: string;
+          description: string;
+          goal: string;
+          id: string;
+          metadata: Json;
+          status: string;
+          title: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          conversation_id?: string | null;
+          created_at?: string;
+          description?: string;
+          goal?: string;
+          id?: string;
+          metadata?: Json;
+          status?: string;
+          title: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          conversation_id?: string | null;
+          created_at?: string;
+          description?: string;
+          goal?: string;
+          id?: string;
+          metadata?: Json;
+          status?: string;
+          title?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_plans_conversation_id_fkey";
+            columns: ["conversation_id"];
+            isOneToOne: false;
+            referencedRelation: "ai_conversations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      ai_prompt_templates: {
+        Row: {
+          category: string;
+          created_at: string;
+          description: string;
+          id: string;
+          is_public: boolean;
+          metadata: Json;
+          name: string;
+          template: string;
+          updated_at: string;
+          user_id: string | null;
+          variables: string[];
+        };
+        Insert: {
+          category?: string;
+          created_at?: string;
+          description?: string;
+          id?: string;
+          is_public?: boolean;
+          metadata?: Json;
+          name: string;
+          template: string;
+          updated_at?: string;
+          user_id?: string | null;
+          variables?: string[];
+        };
+        Update: {
+          category?: string;
+          created_at?: string;
+          description?: string;
+          id?: string;
+          is_public?: boolean;
+          metadata?: Json;
+          name?: string;
+          template?: string;
+          updated_at?: string;
+          user_id?: string | null;
+          variables?: string[];
+        };
+        Relationships: [];
+      };
+      ai_rate_limits: {
+        Row: {
+          id: string;
+          requests_count: number;
+          tokens_used: number;
+          user_id: string;
+          window_start: string;
+        };
+        Insert: {
+          id?: string;
+          requests_count?: number;
+          tokens_used?: number;
+          user_id: string;
+          window_start: string;
+        };
+        Update: {
+          id?: string;
+          requests_count?: number;
+          tokens_used?: number;
+          user_id?: string;
+          window_start?: string;
+        };
+        Relationships: [];
+      };
       conversation_participants: {
         Row: {
           conversation_id: string;
@@ -644,6 +984,10 @@ export type Database = {
         }[];
       };
       gettransactionid: { Args: never; Returns: unknown };
+      increment_ai_rate_limit: {
+        Args: { p_user_id: string; p_window_start: string; p_tokens?: number };
+        Returns: undefined;
+      };
       is_conversation_participant: {
         Args: { _conv: string; _user: string };
         Returns: boolean;

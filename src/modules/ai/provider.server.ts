@@ -1,6 +1,6 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { openai as buildOpenAI } from "@ai-sdk/openai";
-import { google as buildGoogle } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import type { AiProvider, AiModel } from "./types";
 import { AiError } from "./types";
 
@@ -18,13 +18,13 @@ export function getModel(provider: AiProvider, model: AiModel) {
   const googleKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
   if (provider === "openai" && openaiKey) {
-    const client = buildOpenAI({ apiKey: openaiKey });
+    const client = createOpenAI({ apiKey: openaiKey });
     const modelId = model.startsWith("openai/") ? model.slice("openai/".length) : model;
     return client(modelId);
   }
 
   if (provider === "google" && googleKey) {
-    const client = buildGoogle({ apiKey: googleKey });
+    const client = createGoogleGenerativeAI({ apiKey: googleKey });
     const modelId = model.startsWith("google/") ? model.slice("google/".length) : model;
     return client(modelId);
   }

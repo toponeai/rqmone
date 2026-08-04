@@ -193,7 +193,7 @@ export const Route = createFileRoute("/api/chat")({
           model: llm,
           system: systemPrompt,
           messages: await convertToModelMessages(allMessages),
-          maxTokens: 4096,
+          maxOutputTokens: 4096,
           onError: ({ error }) => {
             console.error("[Chat] streamText error:", error);
           },
@@ -201,18 +201,14 @@ export const Route = createFileRoute("/api/chat")({
 
         return result.toUIMessageStreamResponse({
           originalMessages: allMessages,
-          onFinish: async ({ responseMessage, usage }) => {
+          onFinish: async ({ responseMessage }) => {
             if (!responseMessage) return;
-
-            const tokensIn = usage?.promptTokens ?? 0;
-            const tokensOut = usage?.completionTokens ?? 0;
 
             if (conversationId) {
               await supabase.from("ai_messages").insert({
                 conversation_id: conversationId,
                 role: "assistant",
                 parts: responseMessage.parts as unknown as Database["public"]["Tables"]["ai_messages"]["Insert"]["parts"],
-                tokens_used: tokensOut,
               });
             } else {
               await supabase.from("ai_core_messages").insert({
@@ -222,8 +218,8 @@ export const Route = createFileRoute("/api/chat")({
               });
             }
 
-            // Increment rate limit with actual token counts
-            void incrementRateLimit(supabase, userId, tokensIn + tokensOut);
+            // Increment rate limit counter (1 request, token count unavailable in onFinish)
+            void incrementRateLimit(supabase, userId, 0);
 
             // Log the interaction
             void logAiEvent(supabase, {
@@ -232,8 +228,6 @@ export const Route = createFileRoute("/api/chat")({
               event_type: "chat",
               provider,
               model,
-              tokens_in: tokensIn,
-              tokens_out: tokensOut,
               latency_ms: elapsed(),
             });
           },

@@ -18,6 +18,7 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedManageRouteImport } from './routes/_authenticated/manage'
+import { Route as AuthenticatedAiManagerRouteImport } from './routes/_authenticated/ai-manager'
 import { Route as AuthenticatedAiCoreRouteImport } from './routes/_authenticated/ai-core'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -69,6 +70,11 @@ const AuthenticatedManageRoute = AuthenticatedManageRouteImport.update({
   path: '/manage',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAiManagerRoute = AuthenticatedAiManagerRouteImport.update({
+  id: '/ai-manager',
+  path: '/ai-manager',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAiCoreRoute = AuthenticatedAiCoreRouteImport.update({
   id: '/ai-core',
   path: '/ai-core',
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/ai-core': typeof AuthenticatedAiCoreRoute
+  '/ai-manager': typeof AuthenticatedAiManagerRoute
   '/manage': typeof AuthenticatedManageRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/ai-core': typeof AuthenticatedAiCoreRoute
+  '/ai-manager': typeof AuthenticatedAiManagerRoute
   '/manage': typeof AuthenticatedManageRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/ai-core': typeof AuthenticatedAiCoreRoute
+  '/_authenticated/ai-manager': typeof AuthenticatedAiManagerRoute
   '/_authenticated/manage': typeof AuthenticatedManageRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/ai-core'
+    | '/ai-manager'
     | '/manage'
     | '/messages'
     | '/notifications'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/ai-core'
+    | '/ai-manager'
     | '/manage'
     | '/messages'
     | '/notifications'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/ai-core'
+    | '/_authenticated/ai-manager'
     | '/_authenticated/manage'
     | '/_authenticated/messages'
     | '/_authenticated/notifications'
@@ -272,6 +284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedManageRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/ai-manager': {
+      id: '/_authenticated/ai-manager'
+      path: '/ai-manager'
+      fullPath: '/ai-manager'
+      preLoaderRoute: typeof AuthenticatedAiManagerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ai-core': {
       id: '/_authenticated/ai-core'
       path: '/ai-core'
@@ -312,6 +331,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAiCoreRoute: typeof AuthenticatedAiCoreRoute
+  AuthenticatedAiManagerRoute: typeof AuthenticatedAiManagerRoute
   AuthenticatedManageRoute: typeof AuthenticatedManageRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
@@ -319,6 +339,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAiCoreRoute: AuthenticatedAiCoreRoute,
+  AuthenticatedAiManagerRoute: AuthenticatedAiManagerRoute,
   AuthenticatedManageRoute: AuthenticatedManageRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,

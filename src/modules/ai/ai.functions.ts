@@ -643,11 +643,13 @@ export const listAiLogs = createServerFn({ method: "GET" })
   .validator(z.object({ limit: z.number().int().min(1).max(200).default(50), offset: z.number().int().min(0).default(0) }))
   .handler(async ({ data, context }): Promise<AiLog[]> => {
     const input = validateOrThrow(listLogsSchema, data);
+    const limit = input.limit ?? 50;
+    const offset = input.offset ?? 0;
     const { data: rows, error } = await context.supabase
       .from("ai_logs")
       .select("*")
       .order("created_at", { ascending: false })
-      .range(input.offset, input.offset + input.limit - 1);
+      .range(offset, offset + limit - 1);
     if (error) dbErr(error.message);
     return (rows ?? []).map((r) => ({
       ...r,
@@ -671,7 +673,7 @@ export type { AiConversation as StoredAiConversation };
 export type StoredAiMessage = {
   id: string;
   role: string;
-  parts: unknown;
+  parts: import("@/integrations/supabase/types").Json;
 };
 
 export const loadAiCoreHistory = createServerFn({ method: "GET" })
