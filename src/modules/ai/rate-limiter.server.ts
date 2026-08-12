@@ -2,8 +2,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { AiError } from "./types";
 
-export const HOURLY_REQUEST_LIMIT = 100;
-export const HOURLY_TOKEN_LIMIT = 500_000;
+export { HOURLY_REQUEST_LIMIT, HOURLY_TOKEN_LIMIT } from "./limits";
+import { HOURLY_REQUEST_LIMIT, HOURLY_TOKEN_LIMIT } from "./limits";
 
 export interface RateLimitResult {
   allowed: boolean;
