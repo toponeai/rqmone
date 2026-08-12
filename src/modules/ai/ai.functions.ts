@@ -267,7 +267,7 @@ export const updateAgent = createServerFn({ method: "POST" })
 
     const { data: row, error } = await context.supabase
       .from("ai_agents")
-      .update(patch)
+      .update(patch as never)
       .eq("id", id)
       .eq("user_id", context.userId)
       .select()
@@ -373,7 +373,7 @@ export const createPlan = createServerFn({ method: "POST" })
         model,
         system: PLAN_GENERATION_SYSTEM,
         prompt: `Goal: ${input.goal}`,
-        maxTokens: 2000,
+        maxOutputTokens: 2000,
       });
 
       const raw = result.text.trim().replace(/^```json\s*/i, "").replace(/```$/, "").trim();
@@ -573,7 +573,7 @@ export const updateTemplate = createServerFn({ method: "POST" })
 
     const { data: row, error } = await context.supabase
       .from("ai_prompt_templates")
-      .update(patch)
+      .update(patch as never)
       .eq("id", id)
       .eq("user_id", context.userId)
       .select()
