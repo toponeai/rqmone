@@ -79,7 +79,7 @@ import {
   listAiLogs,
 } from "@/modules/ai/ai.functions";
 import { MODEL_OPTIONS, type AiAgent, type AiPlan, type AiPromptTemplate } from "@/modules/ai/types";
-import { HOURLY_REQUEST_LIMIT, HOURLY_TOKEN_LIMIT } from "@/modules/ai/rate-limiter.server";
+import { HOURLY_REQUEST_LIMIT, HOURLY_TOKEN_LIMIT } from "@/modules/ai/limits";
 
 export const Route = createFileRoute("/_authenticated/ai-manager")({
   head: () => ({
