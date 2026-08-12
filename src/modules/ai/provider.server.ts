@@ -1,35 +1,16 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { createOpenAI } from "@ai-sdk/openai";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import type { AiProvider, AiModel } from "./types";
 import { AiError } from "./types";
 
 /**
  * Resolve a language model from provider + model identifiers.
  *
- * Resolution order:
- *  1. provider === "openai" AND OPENAI_API_KEY set → direct OpenAI SDK
- *  2. provider === "google" AND GOOGLE_GENERATIVE_AI_API_KEY set → direct Google SDK
- *  3. All others → Lovable AI Gateway (OpenAI-compatible, supports Gemini / GPT / Claude)
+ * All traffic goes through the Lovable AI Gateway (OpenAI-compatible),
+ * which supports Gemini / GPT / Claude model ids and needs no user key.
  */
-export function getModel(provider: AiProvider, model: AiModel) {
+export function getModel(_provider: AiProvider, model: AiModel) {
   const lovableKey = process.env.LOVABLE_API_KEY;
-  const openaiKey = process.env.OPENAI_API_KEY;
-  const googleKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
-  if (provider === "openai" && openaiKey) {
-    const client = createOpenAI({ apiKey: openaiKey });
-    const modelId = model.startsWith("openai/") ? model.slice("openai/".length) : model;
-    return client(modelId);
-  }
-
-  if (provider === "google" && googleKey) {
-    const client = createGoogleGenerativeAI({ apiKey: googleKey });
-    const modelId = model.startsWith("google/") ? model.slice("google/".length) : model;
-    return client(modelId);
-  }
-
-  // Default: Lovable AI Gateway (always available; supports all provider prefixes)
   if (!lovableKey) {
     throw new AiError(
       "PROVIDER",
@@ -46,6 +27,7 @@ export function getModel(provider: AiProvider, model: AiModel) {
 
   return gateway(model);
 }
+
 
 export const DEFAULT_MODEL: AiModel = "google/gemini-2.5-flash";
 export const DEFAULT_PROVIDER: AiProvider = "lovable-gateway";

@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { Resolver } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
 import {
@@ -395,7 +396,7 @@ function AgentsTab() {
   });
 
   const form = useForm<AgentFormValues>({
-    resolver: zodResolver(agentSchema),
+    resolver: zodResolver(agentSchema) as Resolver<AgentFormValues>,
     defaultValues: {
       name: "",
       description: "",
@@ -707,7 +708,7 @@ function PlansTab() {
   });
 
   const form = useForm<PlanFormValues>({
-    resolver: zodResolver(planSchema),
+    resolver: zodResolver(planSchema) as Resolver<PlanFormValues>,
     defaultValues: { title: "", description: "", goal: "" },
   });
 
@@ -964,7 +965,7 @@ function TemplatesTab() {
   });
 
   const form = useForm<TemplateFormValues>({
-    resolver: zodResolver(templateSchema),
+    resolver: zodResolver(templateSchema) as Resolver<TemplateFormValues>,
     defaultValues: { name: "", description: "", template: "", variables: "", category: "general", is_public: false },
   });
 
