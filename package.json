@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.7",
-    "@ai-sdk/react": "^4.0.23",
+    "@ai-sdk/react": "^4.0.61",
     "@hookform/resolvers": "^5.2.2",
     "@lovable.dev/cloud-auth-js": "^1.1.2",
     "@lovable.dev/mcp-js": "^0.22.2",
