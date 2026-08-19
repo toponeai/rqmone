@@ -1,127 +1,88 @@
-# R.Q.M.1 — Cinematic Rebuild Plan
+# R.Q.M.1 — Repair, Icon Overhaul & Completion Plan
 
-Goal: transform the current 2D "planet navigator" into a real cinematic 3D journey — enter a galaxy of realistic planets (each = a module), fly to Earth to browse geo-located listings, ads, and marketplace entities from users, with premium sound and visual effects.
-
-The existing backend (entities, auth, messaging, notifications, AI Core, MCP) stays intact. This rebuild focuses on the visual/interaction shell and marketplace surface on Earth.
+Goal: repair known gaps, unify the icon system, fill in missing data (translations, textures, planet registry, entity fields), and finish the half-built module planets — **without removing or disabling any existing program, route, or engine**. Everything currently live (Earth, AI Core, AI Manager, Manage, Messages, Notifications, MCP, Galaxy 3D, Window Manager, engines) stays live and only gains capability.
 
 ---
 
-## 1. New 3D Rendering Layer (Three.js + R3F)
+## 1. Icon system repair (the main hygiene fix)
 
-Add `@react-three/fiber` + `@react-three/drei` + `postprocessing` alongside the existing `react-globe.gl`. Create `src/os/galaxy3d/`:
+The project rule is: every icon comes from `@/os/icons`. Right now 30+ files import `lucide-react` directly (routes, entity dialogs, auth menu, AI panels), so the icon set can't be swapped or themed in one place.
 
-- `GalaxyScene.tsx` — starfield (Points), nebula shader, drifting dust, camera rig with `OrbitControls` + auto-orbit.
-- `Planet.tsx` — reusable realistic planet: sphere + PBR textures (color / normal / roughness), atmospheric Fresnel shader, cloud layer, ring option, glow sprite, self-rotation.
-- `Sun.tsx` — central star (AI Core) with lens flare and bloom.
-- `PlanetLabel.tsx` — Drei `Html` billboard with glass label + status badge.
-- `CameraRig.tsx` — smooth `flyTo(target)` using GSAP-style tween on `useFrame`.
-- Postprocessing: Bloom + Vignette + Chromatic Aberration (subtle).
+- Extend `src/os/icons/index.ts` into a complete semantic registry: add the currently-missing names used across the app (mail, lock, key, send, copy, check, alert, info, filter, calendar, tag, price, upload, image, refresh, sparkle-loading, external-link, star, heart, eye, clock, trash, download, chevrons, grid/list toggles, verified badge, shield, robot/agent, plan/task, log).
+- Migrate every app file (routes, `src/modules/**`, `src/components/auth-menu.tsx`, `src/components/ai-elements/**`) to import from `@/os/icons`. Generated `src/components/ui/*` shadcn primitives stay untouched — they're vendor files, not app icons.
+- Add an ESLint `no-restricted-imports` rule banning `lucide-react` outside `src/os/icons/index.ts` and `src/components/ui/`, so the rule enforces itself from now on.
+- Standardise icon sizing/stroke via one `IconProps` convention (`h-4 w-4` default, `strokeWidth 1.75`) so glass UI stays visually consistent.
+- Give each entity type and each planet a dedicated, distinct glyph in `src/modules/config/entity-types.tsx` and `src/os/galaxy/planets.ts` (today Property reuses the Home icon that also means "home nav" — that gets its own house glyph).
 
-Planets pull from existing `src/os/galaxy/planets.ts` registry (no schema change) — each entry gets a `texture` and `size` field.
+## 2. Complete the missing data
 
-## 2. Realistic Planet Assets
+**Translations** — `nav.jobs` is referenced with an `as never` cast in `LeftDock.tsx` and `planets.ts` because the key doesn't exist. Add it plus every other missing key to `en.ts` and `ar.ts`, then remove all `as never` casts so the dictionary is type-checked again. Add missing `module.*.soon` bodies for jobs/analytics/profile/settings/admin instead of the generic fallback.
 
-Generate high-res PBR textures with imagegen (2048×1024 equirectangular) into `public/textures/planets/`:
+**Planet textures** — `public/textures/planets/` has 9 maps but no Moon and no Uranus, and no cloud/normal layers. Generate the missing colour maps plus an Earth cloud layer so Earth looks real in the 3D galaxy.
 
-- earth (already present) → keep; add clouds + night lights variants
-- mars, venus, jupiter, saturn (with ring), neptune, moon-luna
-- one stylized "AI core" star texture
-- Each planet: `<id>_color.jpg`, `<id>_normal.jpg` (optional), plus a shared `stars_milkyway.jpg` skybox
+**Planet registry** — fill in every entry with the fields the 3D layer expects (texture path, orbit radius, orbital speed, tilt, ring flag) so `planetLayout.ts` stops guessing.
 
-## 3. Galaxy → Earth Flow
+**Entity metadata** — additive migration only: `is_featured boolean default false` and `cover_url text` on `public.entities`, plus an index for featured lookups. No column or table is dropped.
 
-`src/routes/index.tsx` becomes a staged experience:
+## 3. Repairs to existing surfaces
 
-```
-[Intro: warp starfield 1.5s] → [Galaxy view: orbiting planets around Sun/AI Core]
-    ↓ click planet
-[Camera zoom + audio whoosh] → module route OR floating window
-    ↓ click Earth
-[Cinematic zoom to Earth] → existing InteractiveEarth v2 (marketplace view)
-```
+- **Galaxy 3D**: wire `useGalaxyStore` mode transitions to the camera (fly-to on planet click, cinematic zoom into Earth) and to the sound cues that already exist in `sound.ts` but are never fired (`warp-in`, `planet-approach`, `earth-enter`, `pin-hover`).
+- **Coming-soon planets stay reachable**: `ComingSoonModule` keeps working; planets that get real routes in step 4 simply flip `status: "soon" → "ready"`.
+- **Earth surface**: per-type pin glyphs with colour-coded glow, featured ring for `is_featured`, glass hover card (title, type, owner, actions), category filter bar, search-flies-camera. `InteractiveEarth` is upgraded in place.
+- **Accessibility**: hidden keyboard-reachable nav mirroring the planet registry, `prefers-reduced-motion` path, aria labels on every icon-only button.
+- **SEO/head**: unique `head()` (title, description, og/twitter) on every content route that lacks one.
 
-State machine via a small `useGalaxyStore` (Zustand): `mode: "galaxy" | "earth" | "transition"`.
+## 4. Finish the remaining module planets (nothing disabled, only added)
 
-## 4. Earth as Marketplace Surface
+Built in this order, each as a real route under the existing shell, each type-agnostic and reusing `entities`/`profiles`:
 
-Upgrade `InteractiveEarth.tsx`:
+1. **Profile** (`/profile`) — display name, avatar upload, public profile page.
+2. **Settings** (`/settings`) — language, theme, sound, motion, notification preferences (persisted per user).
+3. **Marketplace** (`/marketplace`) — list/grid browse over the same entities with filters, sort, and featured rail. No new entity concept.
+4. **Analytics** (`/analytics`) — owner-scoped counts, views, and map heat summary from existing tables.
+5. **Community**, **Jobs**, **Live**, **Wallet** — remain roadmap planets with their coming-soon windows intact and clearer copy, so nothing regresses.
 
-- Distinct pin styles per `entity_type` (Business = storefront glyph, Property = house, Event = calendar burst, Product = tag) with color-coded glow.
-- "Featured / Promoted" ring animation for entities flagged `is_featured` (add optional column via migration — additive, defaults false).
-- Hover card (glass): title, price/type, owner, distance from camera focus, "Open" / "Message owner" actions.
-- Category filter bar (top-center, glass): toggles per entity type; live re-cluster.
-- Search-on-map: uses existing entity search server fn; results fly camera to bbox.
-- "Post to Earth" FAB reuses `CreateEntityDialog`.
+## 5. Suggestions I'd add
 
-## 5. Sound Engine v2
-
-Extend `src/os/engines/sound.ts` with layered cues + optional ambient:
-
-- New cues: `warp-in`, `warp-out`, `planet-approach`, `planet-select`, `earth-enter`, `market-ping`, `pin-hover`.
-- Ambient bed: low-volume synth pad loop (WebAudio oscillator + filter, no asset) toggled with the existing sound switch. Ducked during AI Core responses.
-- Respect `prefers-reduced-motion` + persisted mute.
-
-## 6. Shell Integration
-
-- Replace `PlanetNavigator` overlay's 2D orbit with a mini 3D viewport (same `GalaxyScene` at low density) OR route the "planets" button to switch `mode → galaxy`. Chosen: **switch mode** — one canvas, one truth.
-- Keep `AppShell` chrome (TopNav, docks, WindowManager) floating above the canvas via existing z-index tokens.
-- Add `PerformanceGuard`: auto-drop star count / disable bloom on low-end (detect via `navigator.hardwareConcurrency` + first-frame time).
-
-## 7. Accessibility & Perf
-
-- All planets keyboard-reachable via a hidden `<nav>` list mirroring the registry.
-- `prefers-reduced-motion` → static galaxy image + no bloom + no ambient sound.
-- Textures lazy-loaded; skybox compressed; `frameloop="demand"` when idle.
-- SSR-safe: entire 3D layer behind `<ClientOnly>` + `React.lazy`.
-
-## 8. Migration & Backward Compat
-
-- Additive migration only: `alter table public.entities add column is_featured boolean not null default false;` + index.
-- No changes to auth, messaging, notifications, MCP, AI Core.
-- Old `PlanetNavigator` kept as fallback for reduced-motion users.
+- **Galaxy Time**: subtle day/night terminator on Earth driven by real UTC time.
+- **Entity constellations**: entities owned by one user connect with faint arc lines when their profile is focused.
+- **Command palette deep links**: every planet, entity type, and settings toggle becomes a palette command.
+- **Save/bookmark**: `saved_entities` table so users can pin places to their own orbit.
+- **Share cards**: per-entity OG image URL from `cover_url` so shared links preview properly.
 
 ---
 
-## Technical Section
+## Technical section
 
-Packages to add:
-- `three`, `@react-three/fiber`, `@react-three/drei`, `@react-three/postprocessing`, `postprocessing`, `maath` (easing), `leva` dev-only optional.
+Files touched (all edits additive or in-place upgrades; no deletions of features):
 
-File map (new):
 ```
-src/os/galaxy3d/
-  GalaxyScene.tsx
-  Sun.tsx
-  Planet.tsx
-  PlanetLabel.tsx
-  CameraRig.tsx
-  Starfield3D.tsx
-  useGalaxyStore.ts
-  performance.ts
-public/textures/planets/*.jpg
-src/modules/maps/InteractiveEarth.tsx  (upgraded)
-src/modules/maps/MarketFilters.tsx     (new)
-src/modules/maps/EntityHoverCard.tsx   (new)
-src/os/engines/sound.ts                (extended)
-supabase/migrations/<ts>_entities_featured.sql
+src/os/icons/index.ts                     expanded registry
+eslint.config.js                          no-restricted-imports for lucide-react
+src/os/i18n/locales/{en,ar}.ts            missing keys, remove `as never`
+src/os/galaxy/planets.ts                  full per-planet data
+src/os/galaxy3d/{GalaxyScene,Planet3D,planetLayout,useGalaxyStore}.ts(x)
+src/modules/maps/InteractiveEarth.tsx     pins, hover card, filters
+src/modules/maps/{MarketFilters,EntityHoverCard}.tsx   new
+src/modules/config/entity-types.tsx       distinct glyphs + cover field
+src/routes/{profile,settings,marketplace,analytics}.tsx  new
+public/textures/planets/*                 missing maps
+supabase/migrations/<ts>_entities_featured_cover.sql
+supabase/migrations/<ts>_saved_entities.sql
 ```
 
-Route change: `src/routes/index.tsx` orchestrates `mode` between `GalaxyScene` and `InteractiveEarth`.
+Migration rules followed: `CREATE TABLE` → `GRANT` → `ENABLE ROW LEVEL SECURITY` → policies, owner-scoped on `auth.uid()`. Existing tables only gain nullable/defaulted columns.
 
-Risks & mitigations:
-- **Bundle size**: three ≈ 600 KB gz. Mitigate with dynamic import + code-split per mode.
-- **Texture cost**: generate at 2048×1024, serve as `.jpg` q80; total < 8 MB.
-- **Cloudflare Worker SSR**: entire 3D tree is client-only via `<ClientOnly>` + `React.lazy`; no server import of three.
+Data access: authenticated reads/writes through `createServerFn` with `requireSupabaseAuth`; public reads (marketplace, entity pages) through public server fns so SSR/prerender never 401s. No Supabase edge functions.
 
----
+Verification after each stage: `bun run build:dev`, `tsgo`, route smoke test on `/`, `/ai-core`, `/ai-manager`, `/manage`, `/messages`, `/notifications`, `/marketplace`, `/profile`, `/settings`, `/analytics`, plus a Playwright pass on the 3D galaxy.
 
-## Delivery Stages
+## Delivery stages
 
-1. **Foundation** — install deps, `GalaxyScene` skeleton with starfield + orbiting sphere placeholders, mode store, `<ClientOnly>` wiring on `/`.
-2. **Realistic planets** — generate textures, PBR `Planet` component, Sun + bloom, camera rig, click-to-fly, sound cues.
-3. **Earth marketplace** — upgraded pins, hover card, category filters, featured ring, `is_featured` migration.
-4. **Polish** — ambient audio bed, performance guard, reduced-motion path, keyboard nav, QA pass on RTL + auth flows.
+1. **Icons + i18n repair** — registry, migrations of all imports, ESLint guard, missing keys, casts removed.
+2. **Data completion** — textures, planet registry fields, `is_featured`/`cover_url` migration.
+3. **Earth marketplace surface** — pins, hover card, filters, featured ring, camera/sound wiring.
+4. **New module planets** — Profile, Settings, Marketplace, Analytics.
+5. **Polish** — accessibility, reduced motion, head metadata, saved entities, share cards.
 
-Each stage ends buildable and testable in preview before moving on.
-
-Confirm and I'll execute Stage 1 first.
+Each stage ends buildable and testable in preview.
