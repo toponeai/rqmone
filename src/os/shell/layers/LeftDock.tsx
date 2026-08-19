@@ -47,7 +47,7 @@ const ITEMS: DockItem[] = [
   { id: "wallet", label: "nav.wallet", icon: WalletIcon, disabled: true },
   { id: "live", label: "nav.live", icon: LiveIcon, disabled: true },
   { id: "analytics", label: "nav.analytics", icon: AnalyticsIcon, disabled: true },
-  { id: "jobs", label: "nav.jobs" as never, icon: JobsIcon, disabled: true },
+  { id: "jobs", label: "nav.jobs", icon: JobsIcon, disabled: true },
   { id: "manage", label: "nav.manage", icon: LayersIcon, to: "/manage" },
 ];
 

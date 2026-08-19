@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
-import { Loader2, Sparkles, ShieldCheck } from "lucide-react";
+import { Loader2, Sparkles, ShieldCheck } from "@/os/icons";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";

@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
-import { ArrowLeft, MapPin } from "lucide-react";
+import { ArrowLeft, MapPin } from "@/os/icons";
 
 import { Button } from "@/components/ui/button";
 import { InteractiveEarth } from "@/modules/maps/InteractiveEarth";

@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Loader2, Send, MessageCircle, Users, Search } from "lucide-react";
+import { Loader2, Send, MessageCircle, Users, Search } from "@/os/icons";
 
 const searchSchema = z.object({ c: z.string().optional() });
 

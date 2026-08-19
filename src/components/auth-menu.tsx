@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { LogIn, LogOut, Layers, User as UserIcon, Loader2 } from "lucide-react";
+import { LogIn, LogOut, Layers, User as UserIcon, Loader2 } from "@/os/icons";
 
 import { Button } from "@/components/ui/button";
 import {

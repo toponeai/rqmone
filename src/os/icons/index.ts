@@ -1,12 +1,17 @@
 /**
  * R.Q.M.1 OS — Global Icon Registry.
  *
- * Every icon used anywhere in the OS or a module MUST be re-exported here
- * under a semantic name. Modules import from `@/os/icons` only — never from
- * `lucide-react` directly. This lets us swap the icon set in one place.
+ * Every icon used anywhere in the OS or a module MUST be imported from
+ * `@/os/icons` — never from `lucide-react` directly (enforced by ESLint).
+ * This lets us swap or theme the whole icon set in one place.
+ *
+ * Two export families live here:
+ *  1. Semantic aliases (`EarthIcon`, `MarketplaceIcon`, …) — preferred.
+ *  2. Passthrough names (`ArrowLeft`, `Loader2`, …) — kept so existing
+ *     call sites read naturally; still swappable from this file.
  */
 export {
-  // System / shell
+  // ── System / shell ────────────────────────────────────────────────
   Globe2 as EarthIcon,
   Home as HomeIcon,
   Search as SearchIcon,
@@ -14,6 +19,8 @@ export {
   Bell as BellIcon,
   MessageSquare as MessagesIcon,
   Settings as SettingsIcon,
+  Settings2 as SettingsAltIcon,
+  LayoutDashboard as DashboardIcon,
   User as UserIcon,
   Users as PeopleIcon,
   LogIn as LoginIcon,
@@ -31,6 +38,7 @@ export {
   Sun as ThemeLightIcon,
   Moon as ThemeDarkIcon,
   MapPin as PinLocationIcon,
+  Crosshair as LocateIcon,
   Loader2 as LoaderIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
@@ -38,24 +46,124 @@ export {
   ChevronUp as ChevronUpIcon,
   ArrowLeft as ArrowLeftIcon,
   ArrowRight as ArrowRightIcon,
+  ArrowDown as ArrowDownIcon,
   MoreHorizontal as MoreIcon,
   Layers as LayersIcon,
   Share2 as ShareIcon,
   Bookmark as SaveIcon,
+  BookmarkCheck as SavedIcon,
   Edit3 as EditIcon,
+  Pencil as PencilIcon,
   Trash2 as DeleteIcon,
-  // Module entry points (disabled until each module ships)
+  Eye as VisibleIcon,
+  EyeOff as HiddenIcon,
+  Check as CheckIcon,
+  CheckCheck as CheckAllIcon,
+  Copy as CopyIcon,
+  Mail as MailIcon,
+  Lock as LockIcon,
+  KeyRound as KeyIcon,
+  Send as SendIcon,
+  SlidersHorizontal as FilterIcon,
+  ArrowUpDown as SortIcon,
+  LayoutGrid as GridIcon,
+  List as ListIcon,
+  RefreshCw as RefreshIcon,
+  Upload as UploadIcon,
+  Download as DownloadIcon,
+  Image as ImageIcon,
+  ExternalLink as ExternalLinkIcon,
+  Star as StarIcon,
+  Heart as HeartIcon,
+  Clock as ClockIcon,
+  Tag as TagIcon,
+  CircleDollarSign as PriceIcon,
+  TriangleAlert as AlertIcon,
+  Info as InfoIcon,
+  ShieldCheck as VerifiedIcon,
+  Volume2 as SoundOnIcon,
+  VolumeX as SoundOffIcon,
+  Sparkle as SparkIcon,
+  // ── Module entry points ───────────────────────────────────────────
   ShoppingBag as MarketplaceIcon,
   Wallet as WalletIcon,
   BarChart3 as AnalyticsIcon,
   Radio as LiveIcon,
   Shield as AdminIcon,
   Briefcase as JobsIcon,
-  // Entity types
+  Rocket as LaunchIcon,
+  // ── AI ────────────────────────────────────────────────────────────
+  Bot as AgentIcon,
+  BrainCircuit as BrainIcon,
+  ClipboardList as PlanIcon,
+  ScrollText as LogIcon,
+  FileText as TemplateIcon,
+  Flame as UsageIcon,
+  Zap as ZapIcon,
+  MessageCircle as ChatIcon,
+  // ── Entity types ──────────────────────────────────────────────────
   Store as BusinessIcon,
-  Home as PropertyIcon,
+  House as PropertyIcon,
   CalendarDays as EventIcon,
   Package as ProductIcon,
 } from "lucide-react";
 
-export type { LucideIcon as IconComponent } from "lucide-react";
+/**
+ * Passthrough re-exports. Same underlying set, original lucide names, so
+ * call sites keep reading naturally while still routing through this file.
+ */
+export {
+  ArrowLeft,
+  ArrowRight,
+  ArrowDown,
+  Bell,
+  Bot,
+  BrainCircuit,
+  CalendarDays,
+  Check,
+  CheckCheck,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  Clock,
+  Crosshair,
+  Eye,
+  EyeOff,
+  FileText,
+  Flame,
+  Globe2,
+  Home,
+  House,
+  Layers,
+  LayoutDashboard,
+  Loader2,
+  Lock,
+  LogIn,
+  LogOut,
+  Mail,
+  MapPin,
+  MessageCircle,
+  MessageSquare,
+  Package,
+  Pencil,
+  Plus,
+  ScrollText,
+  Search,
+  Send,
+  Settings2,
+  ShieldCheck,
+  Sparkles,
+  Store,
+  Trash2,
+  User,
+  Users,
+  X,
+  Zap,
+} from "lucide-react";
+
+export type { LucideIcon, LucideIcon as IconComponent } from "lucide-react";
+
+/** Shared sizing/stroke convention for icon-only controls. */
+export const ICON_CLASS = "h-4 w-4";
+export const ICON_STROKE = 1.75;

@@ -13,7 +13,7 @@ import {
   ChevronDown,
   Settings2,
   LayoutDashboard,
-} from "lucide-react";
+} from "@/os/icons";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";

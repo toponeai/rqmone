@@ -23,7 +23,7 @@ import {
   Sparkles,
   Trash2,
   Zap,
-} from "lucide-react";
+} from "@/os/icons";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
