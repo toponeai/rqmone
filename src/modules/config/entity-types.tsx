@@ -1,4 +1,4 @@
-import { Store, Home, CalendarDays, Package, type LucideIcon } from "@/os/icons";
+import { Store, House, CalendarDays, Package, type LucideIcon } from "@/os/icons";
 import type { EntityType } from "@/modules/entity/types";
 
 export interface MetaField {
@@ -39,7 +39,7 @@ export const ENTITY_TYPE_CONFIG: Record<EntityType, EntityTypeConfig> = {
     type: "property",
     label: "Property",
     plural: "Properties",
-    icon: Home,
+    icon: House,
     color: "#60a5fa",
     fields: [
       { key: "price", label: "Price", placeholder: "$1,200,000" },
