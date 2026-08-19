@@ -128,7 +128,7 @@ export const PLANETS: Planet[] = [
   },
   {
     id: "jobs",
-    labelKey: "nav.jobs" as never,
+    labelKey: "nav.jobs",
     icon: JobsIcon,
     color: "#60a5fa",
     size: 36,
