@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
-import { ArrowLeft, Bell, Check, CheckCheck, Globe2, Loader2, X } from "lucide-react";
+import { ArrowLeft, Bell, Check, CheckCheck, Globe2, Loader2, X } from "@/os/icons";
 
 import { Button } from "@/components/ui/button";
 import {

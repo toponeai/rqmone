@@ -1,4 +1,4 @@
-import { Store, Home, CalendarDays, Package, type LucideIcon } from "lucide-react";
+import { Store, Home, CalendarDays, Package, type LucideIcon } from "@/os/icons";
 import type { EntityType } from "@/modules/entity/types";
 
 export interface MetaField {

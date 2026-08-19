@@ -13,7 +13,7 @@ import {
   Trash2,
   Globe2,
   MapPin,
-} from "lucide-react";
+} from "@/os/icons";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

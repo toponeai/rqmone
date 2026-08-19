@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { MapPin, Loader2, Crosshair } from "lucide-react";
+import { MapPin, Loader2, Crosshair } from "@/os/icons";
 
 import {
   Dialog,
