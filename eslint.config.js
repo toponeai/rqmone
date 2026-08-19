@@ -41,5 +41,11 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
     },
   },
+  {
+    // The icon registry and generated shadcn/ai-elements primitives are the
+    // only places allowed to import lucide-react directly.
+    files: ["src/os/icons/index.ts", "src/components/ui/**", "src/components/ai-elements/**"],
+    rules: { "no-restricted-imports": "off" },
+  },
   eslintPluginPrettier,
 );
