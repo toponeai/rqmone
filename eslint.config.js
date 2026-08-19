@@ -29,6 +29,11 @@ export default tseslint.config(
               message:
                 "TanStack Start does not use the Next.js `server-only` package. Rename the module to `*.server.ts` or mark it with `@tanstack/react-start/server-only`.",
             },
+            {
+              name: "lucide-react",
+              message:
+                "Import icons from `@/os/icons` instead — the global icon registry is the only place allowed to touch lucide-react.",
+            },
           ],
         },
       ],
